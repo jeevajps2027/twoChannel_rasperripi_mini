@@ -1,0 +1,631 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'fontawesome-free-6.7.2-web/css/all.min.css' %}">
+    <script src="{% static 'jquery-jquery-f79d5f1/dist/jquery.min.js' %}"></script>
+
+
+    <script src="{% static 'js-xlsx-master/dist/xlsx.full.min.js' %}"></script>
+
+    <!-- Add jsPDF library for PDF conversion -->
+    
+    <script src="{% static 'parallax-jsPDF-57cbe94/dist/jspdf.umd.min.js' %}"></script>
+    
+    <script src="{% static 'plotly-plotly.js-c8e0bef/dist/plotly.min.js' %}"></script>
+
+
+
+    <link rel="stylesheet" href="{% static 'css/spc_chart_val.css' %}">
+
+    <title>SPC REPORTS</title>  
+</head>
+<style>
+
+#exit_btn {
+    margin-left: 4%;
+background-color: #ff4c4c; /* Example: red background */
+border: none;
+padding: 10px;
+border-radius: 5px;
+width: 5%;
+font-weight: bold;
+font-size: 3vh;
+color: white;
+}
+
+.table-container{
+    border: 2px solid black;
+    width: 100%;
+    height: 25%;
+    overflow-x: auto;
+    overflow-y: auto;
+}
+.container-2{
+    border: 2px solid black;
+    width: 100%;
+    height:60% ;
+    overflow-x: auto;
+    justify-content: center;
+    align-items: center;
+    background-color: gray;
+}
+
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box {
+  background-color: yellow;
+  padding: 20px 30px;
+  border-radius: 10px;
+  text-align: center;
+  align-items: center;
+  box-shadow: 0 0 10px #000000aa;
+  height: 30%;
+  width: 50%;
+  font-size: 3vw;
+  font-weight: bold;
+}
+
+.modal-box button {
+  margin-top: 20px;
+  padding: 8px 20px;
+  font-size: 2.5vw;
+  background-color: red;
+  width: 40%;
+  font-weight: bold;
+}
+
+#notificationOkBtn:focus {
+    outline: 2px solid #007bff;
+    background-color: red;
+}
+
+</style>
+
+<body>
+
+<div class="container-1">
+    
+    <div class="container-1-1">
+        <label for="from_date" >START DATE:</label>
+        <input type="datetime-local" class="from-date" id="from_date" name="from_date">
+
+        
+        <input type="text" id="part_model" >
+
+        <input type="text" id="clock-box" >
+
+        <label for="shift_select" >SHIFT:</label>
+        <select id="shift_select" name="shift">
+            <option value="ALL">ALL</option>
+            {% for shift in shift_name %}
+                <option value="{{ shift }}">{{ shift }}</option>
+            {% endfor %}
+        </select>
+        
+        <button type="submit" id="exit_btn">
+            <i class="fas fa-times" id="exit_icon" ></i>F7
+        </button>
+
+
+       
+    </div>
+    <div class="container-1-2">
+ 
+        <label for="to_date">END DATE :</label>
+        <input type="datetime-local" class="to-date"  id="to_date" name="to_date" style=" margin-left: 2%;">
+
+
+
+        
+        <label for="parameter_button" style="width: 7vw;">PARAMETER NAME:</label>
+        <button id="parameter_button" onclick="cycleParameterName()">Click to Cycle</button>
+
+
+        <label for="mode">MODE:</label>
+        <select id="mode" onchange="toggleSampleSizeButton()">
+            <option value="r_chart" >X BAR R-CHART</option>
+            <option value="histogram" id="histogram">HISTOGRAM</option>
+            <option value="piechart" id="piechart">PIECHART</option>
+        </select>
+
+        <label for="sample_size_button" style="width: 5vw;">SAMPLE SIZE:</label>
+        <button id="sample_size_button" onclick="cycleSampleSize()"></button>
+        
+
+        <div id="loading_spinner" style="display: none;">
+            <i class="fas fa-spinner fa-spin"></i> 
+        </div>
+        
+        <button type="submit" id="search_btn">
+            <i class="fas fa-search" id="search_icon"></i>
+        </button>
+
+        <select id="mail_select">
+            {% if primary_email %}
+                <option value="{{ primary_email }}">{{ primary_email }}</option>
+            {% endif %}
+            {% if secondary_email %}
+                <option value="{{ secondary_email }}">{{ secondary_email }}</option>
+            {% endif %}
+        </select>
+
+        <button type="submit" id="mail_btn">
+            <i class="fas fa-envelope" id="mail_icon"></i>
+        </button>
+        
+
+
+        <button type="button" id="download_btn">
+            <i class="fas fa-download" id="download_icon"></i>
+        </button>
+
+        <form id="download_form" method="POST">
+            {% csrf_token %}
+        </form>
+        
+
+        
+    </div>
+</div>
+
+
+    <div id="table-container" class="table-container" style="overflow-y: auto;overflow-x: auto;" ></div>
+
+    <div class="container-2" id="container-2"  style="overflow-y: auto;overflow-x: auto;">
+        
+        
+    </div>
+   
+    <div id="notificationModal" style="display: none;" class="modal-overlay">
+        <div class="modal-box">
+          <p id="notificationMessage">This is a custom notification.</p>
+          <button id="notificationOkBtn">OK</button>
+        </div>
+      </div>
+
+
+<script>
+
+let isNotificationOpen = false;
+
+function showNotifications(message) {
+    isNotificationOpen = true;
+    document.getElementById("notificationMessage").textContent = message;
+    document.getElementById("notificationModal").style.display = "flex";
+    document.getElementById("notificationOkBtn").focus();
+
+    document.getElementById("notificationOkBtn").onclick = () => {
+        document.getElementById("notificationModal").style.display = "none";
+        isNotificationOpen = false;
+
+       
+    };
+}
+   
+
+function toggleSampleSizeButton() {
+    const mode = document.getElementById("mode").value;
+    const button = document.getElementById("sample_size_button");
+
+    if (mode === "r_chart") {
+        button.disabled = false;
+        button.style.opacity = "1";
+        button.style.pointerEvents = "auto";
+    } else {
+        button.disabled = true;
+        button.style.opacity = "0.1"; // visually blurred
+        button.style.pointerEvents = "none"; // no click
+    }
+}
+
+// Initialize state on page load
+document.addEventListener("DOMContentLoaded", toggleSampleSizeButton);
+
+document.addEventListener("keydown", function (event) {
+    // Check if F4 is pressed
+    if (event.key === "F7") {
+        event.preventDefault(); // Prevent default F4 behavior (optional)
+        
+        // Redirect to the Measurement page
+        window.location.href = "/measurement";  // Replace with your actual path
+    }
+});
+
+        document.getElementById("exit_btn").addEventListener("click", function() {
+                // Redirect to the measurement URL
+                window.location.href = "{% url 'measurement' %}";
+            });
+
+        // Function to get query parameters from the URL
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(param);
+        }
+
+        // Retrieve the 'part_model' value and set it in the input box
+        document.addEventListener("DOMContentLoaded", function () {
+            const partModel = getQueryParam("part_model");
+            if (partModel) {
+                document.getElementById("part_model").value = partModel;
+            } else {
+                document.getElementById("part_model").placeholder = "No part model provided.";
+            }
+        });
+
+
+        $(document).ready(function () {
+        // Get the value of the input field
+        var partModel = $('#part_model').val();
+
+        // Send it to the backend via AJAX
+        $.ajax({
+            url: '/spcCharts/', // Replace with your actual URL
+            type: 'GET',
+            data: { part_model: partModel },
+            success: function (response) {
+                console.log('Data sent successfully:');
+            },
+            error: function (xhr, status, error) {
+                console.error('Error sending data:', error);
+            }
+        });
+    });
+
+
+ //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+ $('#download_btn').click(function () {
+    console.log("you click the download button")
+    $('#loading_spinner').show();
+
+    const tableHtml = $('#table-container').html();
+    const chartHtml = $('#container-2').html();
+
+    const fromDate = $('#from_date').val();
+    const partModel = $('#part_model').val();
+    const mode = $('#mode').val();
+    const toDate = $('#to_date').val();
+    const shift = $('#shift_select').val();
+    const parameter_name = $('#parameter_button').text();
+
+    const sample_size = $('#sample_size_button').text();
+
+    $.ajax({
+        url: '/spc_download/',
+        method: 'POST',
+        data: {
+            table_html: tableHtml,
+            chart_html: chartHtml,
+            from_date: fromDate,
+            part_model: partModel,
+            mode: mode,
+            to_date: toDate,
+            shift: shift,
+            parameter_name: parameter_name,
+            sample_size: sample_size,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function (response) {
+            $('#loading_spinner').hide();
+            showNotifications(response.message);
+        },
+        error: function (xhr, status, error) {
+            $('#loading_spinner').hide();
+            console.error('Error:', error);
+            showNotifications('Failed to generate PDF.');
+        }
+    });
+
+    $('#downloadModal').hide();
+});
+
+
+
+
+
+
+
+
+$('#mail_btn').on('click', function () {
+    $('#loading_spinner').show();
+
+    const selectedEmail = $('#mail_select').val();
+    const fromDate = $('#from_date').val();
+    const partModel = $('#part_model').val();
+    const mode = $('#mode').val();
+    const toDate = $('#to_date').val();
+    const shift = $('#shift_select').val();
+    const parameterName = $('#parameter_button').text();
+    const sampleSize = $('#sample_size_button').text();
+    const tableHtml = $('#table-container').html();
+    const chartHtml = $('#container-2').html();
+
+
+    // DEBUG: print values before sending
+    console.log({
+        selectedEmail, fromDate, toDate, partModel, mode,
+        shift, parameterName, sampleSize,
+        chartLength: chartHtml.length,
+        tableLength: tableHtml.length
+    });
+
+    $.ajax({
+        url: '/spc_download/',
+        method: 'POST',
+        data: {
+            export_type: 'send_mail',
+            recipient_email: selectedEmail,
+            from_date: fromDate,
+            part_model: partModel,
+            mode: mode,
+            to_date: toDate,
+            shift: shift,
+            parameter_name: parameterName,
+            sample_size: sampleSize,
+            chart_html: chartHtml,
+            table_html: tableHtml,
+            csrfmiddlewaretoken: '{{ csrf_token }}'
+        },
+        success: function (response) {
+            $('#loading_spinner').hide();
+            showNotifications(response.message);
+        },
+        error: function (xhr, status, error) {
+            $('#loading_spinner').hide();
+            showNotifications('Error: ' + error);
+        }
+    });
+});
+
+
+
+
+ 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+ // Raw parameterNamesString that contains unwanted characters
+const parameterNamesString = "{{ parameter_names|safe }}"; // Rendered as a string
+console.log("Raw parameterNamesString:", parameterNamesString);
+
+// Use a regular expression to extract values inside single quotes
+const parameterNames = parameterNamesString.match(/'([^']+)'/g).map(name => name.replace(/'/g, '').trim());
+console.log("parameterNames Array:", parameterNames);
+
+
+
+let currentIndex = 0; // Initialize index
+console.log("Initial currentIndex:", currentIndex);
+console.log("parameterNames[0]:", parameterNames[0]);
+
+function cycleParameterName() {
+    // Update index to the next parameter
+    currentIndex = (currentIndex + 1) % parameterNames.length;
+
+    // Update the button text
+    document.getElementById('parameter_button').textContent = parameterNames[currentIndex];
+}
+
+// Set initial button text
+if (parameterNames.length > 0) {
+    document.getElementById('parameter_button').textContent = parameterNames[0];
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+let currentSampleSizeIndex = 0; // Initialize index for sample sizes
+const sampleSizes = [2, 3, 4, 5]; // Sample sizes array
+
+// Function to cycle through the sample sizes
+function cycleSampleSize() {
+    // Update index to the next sample size
+    currentSampleSizeIndex = (currentSampleSizeIndex + 1) % sampleSizes.length;
+
+    // Update the button text to the new sample size
+    document.getElementById('sample_size_button').textContent = sampleSizes[currentSampleSizeIndex];
+}
+
+// Set initial button text for sample size
+if (sampleSizes.length > 0) {
+    document.getElementById('sample_size_button').textContent = sampleSizes[0];
+}
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+// AJAX Call - Fetch Data
+$('#search_btn').click(function (event) {
+    event.preventDefault(); // Prevent form submission
+
+    $('#loading_spinner').show();
+    // Collect input values
+    const fromDate = $('#from_date').val();
+    const partModel = $('#part_model').val();
+    const parameterName = $('#parameter_button').text();
+    const sampleSize = $('#sample_size_button').text();
+    
+    const mode = $('#mode').val();
+    const toDate = $('#to_date').val();
+    const shift = $('#shift_select').val();
+   
+    // Payload for AJAX
+    const payload = {
+        from_date: fromDate,
+        part_model: partModel,
+        parameter_name: parameterName,
+        sample_size:sampleSize,
+        mode: mode,
+        to_date: toDate,
+        shift: shift,
+    };
+    console.log('Payload:', payload);
+
+    $.ajax({
+    url: '/spcCharts/',
+    method: 'POST',
+    data: {
+        data: JSON.stringify(payload),
+        csrfmiddlewaretoken: '{{ csrf_token }}'
+    },
+    success: function (response) {
+        $('#loading_spinner').hide();
+
+        // Display the chart
+        if (response.chart_img) {
+            console.log('Chart Image:', response.chart_img);
+            const chartImage = $('<img>', {
+                src: 'data:image/png;base64,' + response.chart_img,
+                alt: 'SPC Chart',
+                class: 'chart-img'
+            });
+            $('#container-2').html(chartImage);
+            
+        } else {
+            showNotifications('No chart data available.');
+        }
+
+        // Display the table
+        if (response.table) {
+            $('#table-container').html(response.table);
+        } 
+    },
+    error: function (xhr, status, error) {
+    $('#loading_spinner').hide();
+    
+    if (xhr.status === 404 && xhr.responseJSON && xhr.responseJSON.error) {
+        showNotifications(xhr.responseJSON.error);  // Show specific message from server
+    } else {
+        console.error('Error:', error);
+        showNotifications('An unexpected error occurred. Please try again.');
+    }
+}
+
+});
+
+   
+});
+
+
+
+
+
+      // Function to update the clock
+function updateClock() {
+  var now = new Date();
+  var hours = now.getHours();
+  var minutes = now.getMinutes();
+  var seconds = now.getSeconds();
+  var day = now.getDate();
+  var month = now.getMonth() + 1; // January is 0, so we add 1 to get the actual month
+  var year = now.getFullYear();
+
+  // Format the time string
+  var ampm = hours >= 12 ? 'PM' : 'AM'; // Determine if it's AM or PM
+  hours = hours % 12; // Convert to 12-hour format
+  hours = hours ? hours : 12; // Handle midnight (0 hours)
+  var timeString = hours + ":" + minutes.toString().padStart(2, '0') + ":" + seconds.toString().padStart(2, '0') + " " + ampm;
+
+  // Format the date string
+  var dateString = day.toString().padStart(2, '0') + "-" + month.toString().padStart(2, '0') + "-" + year;
+
+  var dateTimeString = timeString + " / " + dateString;
+
+  // Update the clock display
+  document.getElementById("clock-box").value = dateTimeString;
+
+  // Call this function again after 1 second
+  setTimeout(updateClock, 1000);
+}
+
+// Call the function to initially display the clock
+updateClock();
+
+
+
+
+// Parse the shift values from your JSON object
+var shiftValues = JSON.parse('{{ shift_values|escapejs }}');
+        console.log('Shift values:', shiftValues);
+
+        // Helper function to convert 12-hour time format to 24-hour format
+        function convertTo24Hour(timeString) {
+            let [time, modifier] = timeString.trim().split(' ');
+            let [hours, minutes, seconds] = time.split(':');
+            if (modifier === 'PM' && hours !== '12') {
+                hours = parseInt(hours, 10) + 12;
+            }
+            if (modifier === 'AM' && hours === '12') {
+                hours = 0;
+            }
+            return `${hours.toString().padStart(2, '0')}:${minutes}:${seconds}`;
+        }
+
+        // Function to determine the from-date based on the current time
+        function setDateTimes() {
+            let now = new Date();
+            let currentTime = now.toTimeString().split(' ')[0]; // 'HH:MM:SS'
+            let currentDate = now.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+
+            // Remove seconds from the current time for to-date
+            let [hours, minutes] = currentTime.split(':');
+            let toDateTime = `${currentDate}T${hours}:${minutes}`;
+
+            // Set the to-date input
+            let toDateElements = document.getElementsByClassName('to-date');
+            for (let element of toDateElements) {
+                element.value = toDateTime;
+            }
+
+            // Determine the from-date based on the shift values
+            let fromDateTime = null;
+            for (let i = shiftValues.length - 1; i >= 0; i--) {
+                let [shiftName, shiftTime] = shiftValues[i];
+                let shift24HourTime = convertTo24Hour(shiftTime);
+                if (currentTime >= shift24HourTime) {
+                    fromDateTime = `${currentDate}T${shift24HourTime}`;
+                    break;
+                }
+            }
+            if (!fromDateTime) {
+                fromDateTime = `${currentDate}T00:00:00`; // Default to start of the day if no shift is found
+            }
+
+            // Set the from-date input
+            let fromDateElements = document.getElementsByClassName('from-date');
+            for (let element of fromDateElements) {
+                element.value = fromDateTime;
+            }
+
+            console.log('Current time:', currentTime);
+            console.log('To date-time (without seconds):', toDateTime);
+            console.log('From date-time:', fromDateTime);
+        }
+
+        setDateTimes();
+    </script>
+</body>
+</html>        

@@ -1,0 +1,3907 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'fontawesome-free-6.7.2-web/css/all.min.css' %}">
+    <script src="{% static 'jquery-jquery-f79d5f1/dist/jquery.min.js' %}"></script>
+
+
+    <title>MEASUREMENT</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  
+    <link rel="stylesheet" href="{% static 'css/measurement_va4.css'%}">
+
+    <style>
+  /* Switch wrapper */
+  .switch {
+  position: relative;
+  display: inline-block;
+  width: 5vw;
+  height: 5vh;
+  
+}
+
+/* Hide default checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 35%;
+  border: 2px solid black;
+}
+
+/* Circle inside slider */
+.slider::before {
+  position: absolute;
+  content: "";
+  height: 3.5vh;
+  width: 2vw;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+/* When checkbox is checked */
+.switch input:checked + .slider {
+  background-color: #4caf50;
+}
+
+/* Move the circle */
+.switch input:checked + .slider::before {
+  transform: translateX(26px);
+}
+
+/* Optional: make it round */
+.slider.round {
+  border-radius: 34px;
+}
+
+.switch-container {
+  position: fixed; /* Or 'absolute' if inside a specific parent */
+  left: 2vw;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+}
+
+
+
+.num-pad {
+    position: absolute;
+    margin-left: 30%;
+ 
+    bottom: 10%;         /* Adjust as needed */
+    
+    background: #ddd;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    height: 45vh;
+    width: 25vw;
+}
+
+.num-btn {
+    width: 30%;
+    height: 15%;
+    font-size: 3vw;
+    margin: 5px;
+    cursor: pointer;
+    border: none;
+    background: white;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.num-btn:hover {
+    background: lightgray;
+}
+
+
+
+        #output_values_container {
+    height: 60vh;       /* Adjust as needed */
+    width: 100%;
+    overflow-y: auto;   /* Enables vertical scroll */
+    position: relative; /* Required for scrollIntoView to behave correctly */
+   
+}
+
+.Output_box {
+    width: 100%;  /* Slightly reduced to fit inside the container */
+    height: 35%;
+    box-sizing: border-box;
+    text-align: center;
+    font-weight: bold;
+    font-size: 9vw;
+    margin-top: 7%;
+    
+}
+.container_2nd{
+   height: 100%;
+   width: 30%;
+   
+}
+
+
+.start_stop{
+    height: 13%;
+    width: 100%;
+   
+   
+}
+
+.button_cont{
+
+    height: 100%;
+    width: 100%;
+  
+}
+
+#spc_btn,#report_btn{
+    width: 15%;
+    height: 60%;
+    margin-left: 5%;
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.2vw;
+    color: black;
+    border: 2px solid black;
+    font-family:'Courier New', Courier, monospace;
+    background-color: rgb(240, 189, 95);
+   
+}
+
+.focused-report-button {
+  outline: 3px solid blue;
+  border-radius: 6px;
+  box-shadow: 0 0 5px blue;
+}
+
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box {
+  background-color: yellow;
+  padding: 20px 30px;
+  border-radius: 10px;
+  text-align: center;
+  align-items: center;
+  box-shadow: 0 0 10px #000000aa;
+  height: 30%;
+  width: 50%;
+  font-size: 3vw;
+  font-weight: bold;
+}
+
+.modal-box button {
+  margin-top: 20px;
+  padding: 8px 20px;
+  font-size: 2.5vw;
+  background-color: red;
+  width: 40%;
+  font-weight: bold;
+}
+
+#notificationOkBtn:focus {
+    outline: 2px solid #007bff;
+    background-color: red;
+}
+
+
+#probe-container {
+    overflow-y: auto;
+    display: flex;
+    flex-wrap: wrap;         /* Wrap to next line if needed */
+    align-items: center;
+    gap: 5px;
+    padding: 5px;
+    height: 100%;
+    box-sizing: border-box;
+}
+
+/* Compress all textareas */
+#probe-container textarea {
+    width: 5vw;              /* Smaller width */
+    height: 2vw;           /* Optional: smaller height */
+    font-size: 0.8vw;
+    resize: none;
+    padding: 2px;
+    box-sizing: border-box;
+    text-align: center;
+}
+
+.custom_table th{
+    background-color: gray;
+   
+    font-size: 1.5vw;
+    font-weight: bold;
+}
+
+.section {
+    border: 1px solid black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    /* justify-content: center; */
+    background-color: gray;
+    width: 100%;
+    height: 100%;
+    padding: 5px;
+    box-sizing: border-box;
+}
+
+
+
+
+
+
+.punchno-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-end;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  pointer-events: none;
+}
+
+.punch_no-box {
+  background-color: white;
+  width: 75%;
+  height: 15%;
+  padding: 10px;
+  margin-bottom: 5%;       /* Distance from bottom */
+  margin-left: 5%;         /* Distance from the left */
+  
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  pointer-events: all;
+}
+
+#punch_no{
+    height: 100%;
+    width: 100%;
+    font-weight: bold;
+    font-size: 4vw;
+   background-color:yellow;
+    color: black;
+}
+
+#punch_no_display{
+    height: 90%;
+    width: 25%;
+    font-weight: bold;
+    font-size: 2vw;
+   background-color:lightgray;
+    color: black;
+}
+
+#notification_bar{
+    width: 55%;
+    height: 95%;
+    margin-left : 3px;
+    background-color: orange;
+    font-weight: bold;
+    font-size: 1.8vw;
+    color: black;
+    text-align: center;
+}
+
+
+.enter_btn_container{
+    background-color: white;
+  width: 15%;
+  height: 15%;
+  padding: 10px;
+  margin-bottom: 5%;       /* Distance from bottom */
+  margin-right: 2%;        /* Distance from the left */
+ 
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  pointer-events: all;
+}
+#enter_btn_main{
+    background-color: #0f0f;
+    height: 90%;
+    width: 90%;
+   
+    font-weight: bold;
+    font-size: 3vw;
+}
+
+
+
+
+
+
+
+.modal-overlay_1 {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box_1 {
+  background-color: yellow;
+  padding: 20px 30px;
+  border-radius: 10px;
+  text-align: center;
+  align-items: center;
+  box-shadow: 0 0 10px #000000aa;
+  height: 35%;
+  width: 50%;
+  font-size: 3vw;
+  font-weight: bold;
+}
+
+.modal-box_1 button {
+  margin-top: 20px;
+  padding: 8px 20px;
+  font-size: 2.5vw;
+  background-color: red;
+  width: 40%;
+  font-weight: bold;
+}
+
+#notificationOkBtn_1:focus {
+    outline: 2px solid #007bff;
+    background-color: red;
+}
+
+
+
+
+
+
+    </style>
+    
+    
+</head>
+<body>
+    <div class="notify" style="display: none;"></div>
+
+    <div id="loading_spinner" style="display: none;">
+        <i class="fas fa-spinner fa-spin"></i> 
+    </div>
+    <div class="container-1">
+        <div class="container-1-1">
+            <button type="submit" id="menu_btn">
+                <i class="fas fa-bars" id="menu_icon"></i>[F12]
+            </button>
+            <input type="text" id="date_time" readonly>
+            <input type="text" id="operator" readonly>
+            <input type="text" id="shift" class="shift-name">
+            <input type="text" id="message" style="margin-left: 1%;" readonly>
+            <button type="submit" id="exit_btn">
+                <i class="fas fa-sign-out-alt" id="exit_icon"></i>
+            </button>
+        </div>
+        <div class="container-1-2">
+            <label for="part_model">PART MODEL:</label>
+            <input type="text" id="part_model" readonly>
+
+            <label for="part_no" style="margin-left: 1%;">PART NAME:</label>
+            <input type="text" id="part_no" readonly>
+
+            <label for="part_status" style="margin-left: 2%;">PART STATUS:</label>
+            <input type="text" id="accept" readonly>
+            <input type="text" id="rework" readonly>
+            <input type="text" id="reject" readonly>
+            <input type="text" id="total" readonly>
+        </div>
+        <div class="container-1-3">
+            <input type="text" id="punch_no_display">
+            <input type="text" id="notification_bar" readonly value="DO MEASUREMENT">
+            <input type="text" id="overall_status" readonly>
+        </div>
+
+    </div>
+
+<!--//////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+
+<div class="container-2">
+    <div class="container_2_1">
+        <div class="section" id="sub_container_1">
+            <input type="text" id="para_name1" class="input-box" placeholder="Parameter Name" readonly/>
+        
+
+            <div class="label-row1">
+                <label for="lsl_1">LSL</label>
+                <label for="nominal_1">NOM</label>
+                <label for="usl_1">USL</label>
+            </div>
+           
+            <div class="input-row-top">
+                <input type="text" id="lsl_1" class="input-box1-top" placeholder="LSL" readonly/>
+                <input type="text" id="nominal_1" class="input-box1-top" placeholder="Nominal" readonly />
+                <input type="text" id="usl_1" class="input-box1-top" placeholder="USL"  readonly/>
+            </div>
+
+
+
+            <input type="text" class="Output_box" id="Output_box1" readonly/>
+        
+            <div class="label-row">
+                <label for="max1">MAX</label>
+                <label for="min1">MIN</label>
+                <label for="tir1">TIR</label>
+            </div>
+        
+            <div class="input-row">
+                <input type="text" id="max1" class="input-box1" readonly />
+                <input type="text" id="min1" class="input-box1"  readonly/>
+                <input type="text" id="tir1" class="input-box1" readonly />
+            </div>
+        </div>
+        
+        <div class="section"  id="sub_container_2">
+            <input type="text" id="para_name2" class="input-box" placeholder="Parameter Name" readonly/>
+        
+            <div class="label-row1">
+                <label for="lsl_2">LSL</label>
+                <label for="nominal_2">NOM</label>
+                <label for="usl_2">USL</label>
+            </div>
+
+            <div class="input-row-top">
+                <input type="text" id="lsl_2" class="input-box1-top" placeholder="LSL" readonly/>
+                <input type="text" id="nominal_2" class="input-box1-top" placeholder="Nominal" readonly/>
+                <input type="text" id="usl_2" class="input-box1-top" placeholder="USL" readonly/>
+            </div>
+
+
+
+            <input type="text" class="Output_box"  id="Output_box2"  readonly/>
+        
+            <div class="label-row">
+                <label for="max1">MAX</label>
+                <label for="min1">MIN</label>
+                <label for="tir1">TIR</label>
+            </div>
+        
+            <div class="input-row">
+                <input type="text" id="max2" class="input-box1" readonly />
+                <input type="text" id="min2" class="input-box1" readonly />
+                <input type="text" id="tir2" class="input-box1" readonly />
+            </div>
+        </div>
+       
+    </div>
+   
+   
+
+<div class="container_2nd" >
+
+<div class="output_container" id="output_values_container" style="overflow-y: auto;">
+    <div>
+        <table border="1" width="100%" class="custom_table"  width="100%">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>PARA NAME</th>
+                    <th>CUR</th>
+                    <th>MAX</th>
+                    <th>MIN</th>
+                    <th>TIR</th>
+
+                </tr>
+            </thead>
+            <tbody id="table_body">
+            
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="start_stop"  >
+    <div class="button_cont">
+    <button id="rest-btn" class="toggle-btn" style="display: none;">START[F4]<br>STOP[F5]</button>
+</div>
+    <div  id="probe-container" >
+        <textarea id="probe-A"></textarea>
+        <textarea id="probe-B"></textarea>
+         <textarea id="probe-C"></textarea>
+        <textarea id="probe-D"></textarea>
+        <textarea id="probe-E"></textarea>
+        <textarea id="probe-F"></textarea>
+        <textarea id="probe-G"></textarea>
+        <textarea id="probe-H"></textarea>
+
+        <textarea id="probe-I"></textarea>
+        <textarea id="probe-J"></textarea>
+        <textarea id="probe-K"></textarea>
+     </div>
+    
+
+</div>
+
+</div>
+    
+</div>
+
+<div id="punch_no_container"  class="punchno-overlay" style="display: none;">
+    <div class="punch_no-box">
+        <input type="text" id="punch_no" placeholder="ENTER THE PUNCH NO:">
+        
+    </div>
+
+    <div class="enter_btn_container">
+        <button id="enter_btn_main">ENTER</button>
+    </div>
+    
+  </div>
+
+    
+
+<!--//////////////////////////////////////////////////////////////////////////////////////////////////////////////// -->
+
+    <div class="container-3">
+       
+       
+        <div class="container-3-2">
+           
+
+            <button type="submit" class="container-3-2-btn" id="master_btn">MASTERING[F1]</button>
+            <button type="submit" class="container-3-2-btn" id="model_btn" onclick="showNextPartName()">MODEL[F2]</button>
+            <button type="submit" class="container-3-2-btn" id="live_spc_btn">LIVE SPC[F3]</button>
+            <button type="submit" class="container-3-2-btn" id="report_btn_main">REPORT[F6]</button>
+
+            <button type="button" class="container-3-2-btn" id="spc_btn" style="display:none;">SPC[F7]</button>
+            <button type="button" class="container-3-2-btn" id="report_btn" style="display:none;">REPORT[F8]</button>
+
+           
+        </div>
+
+        <div id="punch_overwrite" class="center-notification" >
+            <div id="punch_overwrite_container">
+                <p id="error_message"></p>
+                <p>Do you want to OVERWRITE</p>
+                <button id="overwrite_cancel_button" onclick="punchOverwriteCancel()">CANCEL</button>
+                <button id="overwrite_ok_button" onclick="punchOverwrite()" >OK</button>
+            </div>
+            <div id="punch_overwrite_credentials">
+                <div class="switch-container">
+                    <i class="fas fa-keyboard" style="margin-right: 10px;font-size: 5vh;color: maroon;"></i>
+                    <label class="switch">
+                      <input type="checkbox" id="toggle-switch">
+                      <span class="slider round"></span>
+                    </label>
+                  </div>
+               
+                <label for="password_punch">PASSWORD:</label>
+                <input type="text" id="password_punch" class="userpassinput"  ><br><br>
+                <button id="punch_login" onclick="punchOverwriteLogin()">OK</button>
+                </div>
+        </div>
+
+
+        </div>
+    
+        <input type="text" id="db_port" value="{{ comport_com_port }}" hidden>
+        <input type="text" id="com_ports" value="{{ ports_string }}" hidden>
+        <input type="text" id="baud_rate" value="{{ comport_baud_rate }}" hidden>
+        <input type="text" id="parity" value="{{ comport_parity }}" hidden>
+        <input type="text" id="stopbit" value="{{ comport_stopbit }}" hidden>
+        <input type="text" id="databit" value="{{ comport_databit }}" hidden>
+        <textarea id="serial-data-display" cols="50" rows="10" readonly hidden></textarea>  
+
+            <!-- Custom Notification Modal -->
+<div id="notificationModal" style="display: none;" class="modal-overlay">
+    <div class="modal-box">
+      <p id="notificationMessage">This is a custom notification.</p>
+      <button id="notificationOkBtn">OK</button>
+    </div>
+  </div>
+
+  <div id="notificationModal_1" style="display: none;" class="modal-overlay_1">
+    <div class="modal-box_1">
+      <p id="notificationMessage_1">This is a custom notification.</p>
+      <button id="notificationOkBtn_1">OK</button>
+    </div>
+  </div>
+
+
+
+
+
+
+  
+
+
+   
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const inputs = document.querySelectorAll("input");
+    inputs.forEach(input => input.setAttribute("autocomplete", "off"));
+});
+
+
+
+
+
+let isNotificationOpen = false;
+
+function showNotifications(message) {
+    isNotificationOpen = true;
+    document.getElementById("notificationMessage").textContent = message;
+    document.getElementById("notificationModal").style.display = "flex";
+    document.getElementById("notificationOkBtn").focus();
+
+    document.getElementById("notificationOkBtn").onclick = () => {
+        document.getElementById("notificationModal").style.display = "none";
+        isNotificationOpen = false;
+        location.reload();
+       
+    };
+}
+
+
+function showNotifications1(message, partModel) {
+    isNotificationOpen1 = true;
+
+    document.getElementById("notificationMessage_1").textContent = message;
+    document.getElementById("notificationModal_1").style.display = "flex";
+    document.getElementById("notificationOkBtn_1").focus();
+
+    document.getElementById("notificationOkBtn_1").onclick = () => {
+        document.getElementById("notificationModal_1").style.display = "none";
+        isNotificationOpen1 = false;
+
+        // Redirect to master page with part_model in URL
+        const encodedModel = encodeURIComponent(partModel);
+        window.location.href = `/master/?part_model=${encodedModel}`;
+    };
+}
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+            // Get the username passed from the backend
+            let receivedUserName = "{{ username|safe }}";
+            console.log('Your receivedUserName is:', receivedUserName);
+
+            // Get the button element
+            const menuButton = document.getElementById("menu_btn");
+
+            // Add a click event listener to the button
+            menuButton.addEventListener("click", function (event) {
+                // Check if the username is SAADMIN
+                if (receivedUserName === "SAADMIN") {
+                    // Redirect to the comport page
+                    window.location.href = "{% url 'comport' %}";
+                } else {
+                    // Show an showNotifications message and prevent redirection
+                    event.preventDefault();
+                    showNotifications("You are not authorized to access this page.");
+                }
+            });
+        });
+
+        document.addEventListener('keydown', function (event) {
+    switch (event.key) {
+        case 'F1':
+            event.preventDefault();
+            const masterBtn = document.getElementById('master_btn');
+            if (
+                masterBtn &&
+                !masterBtn.disabled && 
+                masterBtn.style.filter !== "blur(2px)"
+            ) {
+                masterBtn.click();
+            }
+            break;
+
+        case 'F2':
+            event.preventDefault();
+            const modelBtn = document.getElementById('model_btn');
+            if (
+                modelBtn &&
+                !modelBtn.disabled &&
+                modelBtn.style.filter !== "blur(2px)"
+            ) {
+                modelBtn.click();
+            }
+            break;
+
+        case 'F3':
+            event.preventDefault();
+            const spcBtn = document.getElementById('live_spc_btn');
+            if (
+                spcBtn &&
+                !spcBtn.disabled &&
+                spcBtn.style.filter !== "blur(2px)"
+            ) {
+                spcBtn.click();
+            }
+            break;
+
+        case 'F12':
+            event.preventDefault();
+            const menuBtn = document.getElementById('menu_btn');
+            if (
+                menuBtn &&
+                !menuBtn.disabled &&
+                menuBtn.style.filter !== "blur(2px)"
+            ) {
+                menuBtn.click();
+            }
+            break;
+    }
+});
+
+
+
+
+    document.getElementById("exit_btn").addEventListener("click", function() {
+        // Redirect to the measurement URL
+        window.location.href = "{% url 'login' %}";
+    });
+    
+
+
+$(document).ready(function () {
+    // Delay the execution by 2 seconds
+    setTimeout(function () {
+        // Get the input values
+        var dateTime = $("#date_time").val(); // Example: 21/12/2024 6:53:57 PM
+        console.log('Original value:', dateTime);
+
+        // Convert the original format to Date object
+        var dateParts = dateTime.split(' ');
+        var date = dateParts[0].split('/');
+        var time = dateParts[1].split(':');
+        var ampm = dateParts[2];
+        
+        // Convert to 12-hour format (adjust time to 12-hour clock)
+        var hours = parseInt(time[0]);
+        if (ampm === 'PM' && hours < 12) {
+            hours += 12; // Convert PM hours to 24-hour format
+        }
+        if (ampm === 'AM' && hours === 12) {
+            hours = 0; // Convert 12 AM to 0 (midnight)
+        }
+
+        // Construct Date object with the corrected time
+        var formattedDate = new Date(date[2], date[1] - 1, date[0], hours, time[1], time[2]);
+
+        // Format the date to "yyyy/mm/dd hh:mm:ss AM/PM"
+        var year = formattedDate.getFullYear();
+        var month = (formattedDate.getMonth() + 1).toString().padStart(2, '0'); // Add leading zero if needed
+        var day = formattedDate.getDate().toString().padStart(2, '0'); // Add leading zero if needed
+        var hours12 = formattedDate.getHours() % 12 || 12; // 12-hour format
+        var minutes = formattedDate.getMinutes().toString().padStart(2, '0');
+        var seconds = formattedDate.getSeconds().toString().padStart(2, '0');
+        var period = (formattedDate.getHours() >= 12) ? 'PM' : 'AM';
+
+        var formattedDateTime = `${year}/${month}/${day} ${hours12}:${minutes}:${seconds} ${period}`;
+        console.log('Formatted value to send:', formattedDateTime);
+
+        var shift = $("#shift").val(); // Example: SHIFT-2
+        var partModel = $("#part_model").val(); // Get the value of the part model input
+
+
+        // Send AJAX GET request
+        $.ajax({
+            url: '/measurement_count/', // Replace this with your actual endpoint
+            type: 'POST',
+            data: { 
+                date: formattedDateTime, 
+                shift: shift,
+                part_model: partModel,
+            },
+            success: function (response) {
+                console.log("Data received successfully:");
+                console.log("Accept Last Occurrence:", response.accept_occurrence);
+                console.log("Reject Last Occurrence:", response.reject_occurrence);
+                console.log("Rework Last Occurrence:", response.rework_occurrence);
+                console.log("Total Occurrence:", response.total_occurrence);
+
+                // Display the values in the input fields
+                $('#accept').val(response.accept_occurrence);
+                $('#reject').val(response.reject_occurrence);
+                $('#rework').val(response.rework_occurrence);
+                $('#total').val(response.total_occurrence);
+            },
+            error: function (error) {
+                console.log("Error:", error);
+            },
+        });
+    }, 2000); // Delay of 2000 milliseconds (2 seconds)
+});
+
+
+
+// Initialize the list of part names and the current index
+let receivedValue = "{{ part_model|safe }}";
+console.log('your part_model is:', receivedValue);
+
+let partNames = receivedValue
+    .replace(/[\[\]' ]/g, '')  // Remove [, ], ', and spaces
+    .split(',');               // Split by comma to get an array
+
+// Get the current part from the input field
+const currentPartModel = document.getElementById('part_model').value;
+
+// Set currentIndex based on current part model
+let currentIndex = partNames.indexOf(currentPartModel);
+
+// If not found, default to 0
+if (currentIndex === -1) {
+    currentIndex = 0;
+}
+
+function showNextPartName() {
+    if (partNames.length > 0) {
+        // Move to the next index
+        currentIndex = (currentIndex + 1) % partNames.length;
+
+        const partModel = partNames[currentIndex];
+        document.getElementById('part_model').value = partModel;
+
+        sendPartModelToBackend(partModel);
+        sendPartModelForCount(partModel);
+
+      
+    } else {
+        showNotifications("No part names available.");
+    }
+}
+
+// // Add a keydown event listener for the F2 key
+// document.addEventListener('keydown', (event) => {
+//     if (event.key === 'F2') {
+//         // Prevent the default behavior of the F2 key (e.g., renaming files in some OS)
+//         event.preventDefault();
+
+//         // Call the showNextPartName function
+//         showNextPartName();
+//     }
+// });
+
+
+// Initialize the part model input on page load and send the initial value
+$(document).ready(function () {
+    if (partNames.length > 0) {
+        // Initialize the input box with the first part name
+        const initialPartModel = partNames[0];
+        $('#part_model').val(initialPartModel);
+
+        // Send the initial part model to the backend
+        console.log("Initial partModel sent to the backend:", initialPartModel);
+        sendPartModelToBackend(initialPartModel);
+    } else {
+        console.warn("No part names available on page load.");
+    }
+});
+
+        // Initialize the input box on page load
+        window.onload = function () {
+            if (partNames.length > 0) {
+                document.getElementById('part_model').value = partNames[0];
+            }
+        };
+/////////////////////////////////////////////////////////////////
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+    var savedPunchValue = localStorage.getItem('punchValue');
+
+    if (savedPunchValue) {
+        let punchTextarea = document.getElementById('punch_no');
+        punchTextarea.value = savedPunchValue;
+
+        // Clear localStorage value
+        localStorage.removeItem('punchValue');
+
+        // Set focus on the textarea
+        punchTextarea.focus();
+
+        // Automatically trigger Enter key after 2 seconds
+        setTimeout(function () {
+            let enterEvent = new KeyboardEvent('keydown', {
+                key: 'Enter',
+                code: 'Enter',
+                keyCode: 13,
+                which: 13,
+                bubbles: true
+            });
+
+            punchTextarea.dispatchEvent(enterEvent);
+        }, 500); // 2000 milliseconds = 2 seconds
+    }
+});
+
+
+
+
+
+function getCSRFToken() {
+    const cookie = document.cookie.split('; ').find(row => row.startsWith('csrftoken='));
+    return cookie ? cookie.split('=')[1] : '';
+}
+
+
+document.getElementById('enter_btn_main').addEventListener('click', function () {
+    let punchTextarea = document.getElementById('punch_no');
+
+    // Focus the input first
+    punchTextarea.focus();
+
+    // Trigger the Enter key on the input field
+    let enterEvent = new KeyboardEvent('keydown', {
+        key: 'Enter',
+        code: 'Enter',
+        keyCode: 13,
+        which: 13,
+        bubbles: true
+    });
+
+    punchTextarea.dispatchEvent(enterEvent);
+});
+
+
+
+
+// Global object to store the response data for future use
+let responseData = {};
+
+
+// Global variable to store the total number of steps
+let totalSteps ;
+
+// Function to send the part model to the backend and store the response data
+function sendPartModelToBackend(partModel) {
+    console.log("Sending updated partModel to backend:", partModel);
+
+    $.ajax({
+        url: '/measurement/', // Replace with your backend endpoint
+        method: 'POST',
+        data: { part_model: partModel },
+        success: function (response) {
+            console.log("part_name_value:", response.part_name_value);
+            console.log("char_lock_value:", response.char_lock_value);
+            console.log("char_lock_limit_value:", response.char_lock_limit_value);
+            console.log("punch_no_value:", response.punch_no_value);
+
+                // 🔔 Display missing probes if any
+    if (response.missing_probes && response.missing_probes.length > 0) {
+        const missingList = response.missing_probes.join(", ");
+        showNotifications1("DO MASTERING FOR THIS PART MODE",partModel);
+       
+    } 
+
+    const punchOverlay = document.getElementById('punch_no_container');
+
+if (response.punch_no_value === false) {
+    console.log("FALSE CONDITION: punch_no_value is false");
+
+    if (punchOverlay) {
+        punchOverlay.style.display = 'flex';
+
+        const punchBox = punchOverlay.querySelector('.punch_no-box');
+        if (punchBox) {
+            punchBox.style.display = 'none';
+        }
+    }
+
+} else if (response.punch_no_value === true) {
+    console.log("TRUE CONDITION: punch_no_value is true");
+
+    if (punchOverlay) {
+        punchOverlay.style.display = 'flex';  // or 'block' depending on layout
+    }
+
+    const punchNoField = document.getElementById('punch_no');
+    if (punchNoField) {
+        punchNoField.focus(); // optional, if needed
+    }
+
+    const punchBox = punchOverlay.querySelector('.punch_no-box');
+    if (punchBox) {
+        punchBox.style.display = 'block'; // or 'flex' depending on your layout
+    }
+}
+
+
+
+            const restButton = document.getElementById('rest-btn'); // Get the button element
+            const punchNoContainer = document.getElementById('punch_no_container');
+            const punchNoDisplay = document.getElementById('punch_no_display');
+
+            if (response.punch_no_value === true) {
+                const punchNoField = document.getElementById('punch_no');
+                if (punchNoContainer) punchNoContainer.style.display = 'flex';
+                if (punchNoField) {
+                    punchNoField.disabled = false; // Ensure the field is enabled
+                    punchNoField.style.filter = 'none'; // Remove blur effect
+                    punchNoField.focus(); // Focus on the input field
+
+                    if (restButton) {
+                        restButton.disabled = true; // Disable the button
+                        restButton.style.filter = 'blur(2px)'; // Apply blur effect
+                    }
+                    
+                }
+                // Remove any existing event listeners (optional, to avoid multiple bindings)
+                punchNoField.onkeydown = null;
+
+                // Listen for "Enter" key press
+                // Listen for "Enter" key press
+                punchNoField.addEventListener('keydown', function (event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        if (punchNoContainer) punchNoContainer.style.display = 'none';
+                        document.activeElement.blur(); 
+                        const inputValue = punchNoField.value;
+                        const charLockValue = response.char_lock_value;
+                        const charLockLimitValue = response.char_lock_limit_value;
+                        const partModel = document.getElementById('part_model').value; // Get part_model
+
+                        
+
+                        // Validation checks for input value
+                        if (charLockValue && !inputValue.startsWith(charLockValue)){
+                            showNotifications("INVALID PUNCH NUMBER");
+                            punchNoField.value = '';
+                            punchNoField.focus();
+
+                            return;
+                        }
+
+                        const expectedLength = Number(charLockLimitValue);
+                        if (expectedLength > 0 && inputValue.length !== expectedLength) {
+                            showNotifications("INVALID PUNCH NUMBER");
+
+                            
+
+                            punchNoField.value = '';
+                            punchNoField.focus();
+
+                            return;
+                        }
+
+
+                         // ✅ Display the value in #punch_no_display
+                         if (punchNoDisplay) {
+                                punchNoDisplay.value = inputValue;
+                            }
+
+                            // Hide the container and blur the input
+                            if (punchNoContainer) punchNoContainer.style.display = 'none';
+                            document.activeElement.blur();
+
+                        // Re-enable and remove blur effect from the rest button
+                        if (restButton) {
+                            restButton.disabled = false; // Enable the button
+                            restButton.style.filter = 'none'; // Remove blur effect
+                        }
+
+                        
+
+                        // Step 1: Send POST request to check if the punch number exists
+                        fetch('/delete_measure_data/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': getCSRFToken()
+                            },
+                            body: JSON.stringify({ input_value: inputValue, part_model: partModel }) // Send part_model and comp_sr_no
+                        })
+                        .then(response => response.json()) // Ensure the response is JSON
+                        .then(data => {
+                            if (data.status === 'exists') {
+                               
+                                // Step 2: Show overwrite confirmation popup
+                                document.getElementById('error_message').innerText = data.message;
+                                document.getElementById('punch_overwrite').style.display = 'block';
+
+
+
+                                // Handle OK button click
+                                document.getElementById('overwrite_ok_button').onclick = function () {
+                                    document.getElementById('punch_overwrite_container').style.display = 'none';
+                                    // Show credentials input field
+                                    document.getElementById('punch_overwrite_credentials').style.display = 'block';
+                                };
+
+                                // Handle Cancel button click
+                                document.getElementById('overwrite_cancel_button').onclick = function () {
+                                    document.getElementById('punch_overwrite').style.display = 'none';
+                                    location.reload();
+                                };
+
+                                // Step 3: Handle deletion with credentials
+                                document.getElementById('punch_login').onclick = function () {
+                                    // const userId = document.getElementById('userid_punch').value; // Get user ID from input field
+                                    const password = document.getElementById('password_punch').value; // Get password from input field
+
+                                    // Validate credentials before posting
+                                    if ( password !== 'admin') {
+                                        showNotifications('Invalid credentials. Please check username and password.');
+                                        return;
+                                    }
+                                    localStorage.setItem('punchValue', inputValue);
+                                    // Send delete request with credentials
+                                    fetch('/delete_measure_data/', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRFToken': getCSRFToken()
+                                        },
+                                        body: JSON.stringify({
+                                            input_value: inputValue,
+                                            part_model: partModel,
+                                            password: password
+                                        })
+                                    })
+                                    .then(response => response.json())
+                                    .then(deleteData => {
+                                        showNotifications(deleteData.message); // Show success/error message
+                                      
+                                        location.reload();
+                                        if (deleteData.success) {
+                                            document.getElementById('punch_overwrite').style.display = 'none';
+                                            $('#punch_overwrite').hide();
+                                            
+                                        }
+                                    })
+                                    .catch(error => {
+                                        console.error('Error:', error);
+                                        showNotifications('Failed to delete punch number.');
+                                    });
+                                };
+                            }
+                             else { 
+                                
+                                setTimeout(() => {
+    const restBtn = document.getElementById('rest-btn');
+    const autoManArray = response.auto_man_array || [];
+
+    console.log("autoManArray[0]:", autoManArray[0]);
+
+    if (restBtn) {
+        restBtn.style.display = 'block';
+
+        if (autoManArray[0] === true) {
+            console.log("Disabling restBtn due to autoManArray[0] === true");
+            restBtn.disabled = true;
+            restBtn.style.filter = 'blur(3px)';
+            restBtn.style.pointerEvents = 'none';
+        } else {
+            console.log("Enabling restBtn because autoManArray[0] !== true");
+            restBtn.disabled = false;
+            restBtn.style.filter = '';
+            restBtn.style.pointerEvents = '';
+        }
+    }
+}, 100); // Delay for 100ms to allow DOM to render fully
+let notificationBar = document.getElementById('notification_bar');
+notificationBar.value = `DO MEASUREMENT FOR STEP ${currentStep} `;
+
+                                    updateUI(responseData);
+
+                                    // document.getElementById('rest-btn').style.display = 'none';
+
+                                
+
+                                    // allowFunctionKeys = true; // Now enable F4 and F5
+                                    button.disabled = false;
+                                    button.style.filter = "";
+                                    button.style.pointerEvents = "";
+
+                                    // Disable F-key buttons during measurement
+                                    const functionButtons = ["master_btn", "model_btn", "live_spc_btn", "report_btn_main", "menu_btn"];
+                                    functionButtons.forEach(id => {
+                                        const btn = document.getElementById(id);
+                                        if (btn) {
+                                            btn.disabled = true;
+                                            btn.style.filter = "blur(2px)";
+                                            btn.style.pointerEvents = "none";
+                                        }
+                                    });
+                                // ✅ Clear only measurement values
+                                parameterNames.forEach((name, index) => {
+                                    const i = index + 1;
+                                    const curInput = document.getElementById(`cur_${i}`);
+                                    const maxInput = document.getElementById(`max_${i}`);
+                                    const minInput = document.getElementById(`min_${i}`);
+                                    const tirInput = document.getElementById(`tir_${i}`);
+
+                                    if (curInput) {
+                                curInput.value = "";
+                                curInput.style.backgroundColor = ""; // ✅ Clear color
+                            }
+                                    if (maxInput) maxInput.value = "";
+                                    if (minInput) minInput.value = "";
+                                    if (tirInput) tirInput.value = "";
+                                });
+                            
+
+                            handleKeyPress(event); // For F4/F5 handling
+
+
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            showNotifications('Failed to process punch number.');
+                        });
+                        
+                    }
+                });
+
+
+                
+
+
+            } 
+            else {
+                // Keep the button disabled and blurred if 'punch_no_value' is false
+               // $('#rest-btn').prop('disabled', false).css('filter', 'none');
+                const punchNoField = document.getElementById('punch_no');
+                if (punchNoField) {
+                    punchNoField.disabled = true; // Disable the field
+                    punchNoField.style.filter = 'blur(2px)'; // Apply blur effect
+                }
+
+                if (restButton) {
+                    restButton.disabled = false;
+                    restButton.style.filter = 'none';
+                }
+            }
+
+
+
+
+            
+
+            // Display the 'part_name_value' in the input field with id 'part_no'
+            $('#part_no').val(response.part_name_value);
+
+            // Update the global responseData object
+            responseData = {
+                partNameValue: response.part_name_value,
+                charLockValue: response.char_lock_value,
+                charLockLimitValue: response.char_lock_limit_value,
+                punchNoValue: response.punch_no_value,
+                parameterValues: response.parameter_values,
+                parameterNameArray: response.parameter_name_array,
+                channelNoArray: response.channel_no_array,
+                lowMasterArray: response.low_master_array,
+                highMasterArray: response.high_master_array,
+                nominalArray: response.nominal_array,
+                lslArray: response.lsl_array,
+                uslArray: response.usl_array,
+                ltlArray: response.ltl_array,
+                utlArray: response.utl_array,
+                stepNoArray: response.step_no_array,
+                autoManArray: response.auto_man_array,
+                timerArray: response.timer_array,
+                digitsArray: response.digits_array,
+                singleDoubleArray : response.single_double_array,
+                parameter_factor_values:response.parameter_factor_values,
+                
+            };
+
+
+            console.log("Step No:", response.step_no_array);
+            console.log(" response.parameter_name_array No:", response.parameter_name_array);
+
+            
+            console.log("Response Data:", responseData);
+
+
+
+
+
+
+
+            const channelNoArray = responseData.channelNoArray;
+                const firstIndexMap = {};
+                const probeDataArray = responseData.parameterValues;
+                const parameter_factor_values = responseData.parameter_factor_values;
+
+                // Step 1: Build firstIndexMap
+                channelNoArray.forEach((channel, index) => {
+                    if (firstIndexMap[channel] === undefined) {
+                        firstIndexMap[channel] = index;
+                    }
+                });
+
+                console.log("First Index of Each Channel:", firstIndexMap);
+
+                // Store all display data here
+                const displayDataList = [];
+
+                let gaugeIndex = 1;
+
+                Object.entries(firstIndexMap).forEach(([channel, index]) => {
+                    const lowMaster = responseData.lowMasterArray[index];
+                    const highMaster = responseData.highMasterArray[index];
+                    const lsl = responseData.lslArray[index];
+                    const nominal = responseData.nominalArray[index];
+                    const usl = responseData.uslArray[index];
+                    const ltl = responseData.ltlArray[index];
+                    const utl = responseData.utlArray[index];
+                    const digits = responseData.digitsArray[index];
+                    const single_double = responseData.singleDoubleArray[index];
+                    const parameterName = responseData.parameterNameArray[index];
+                    const probeNumber = responseData.channelNoArray[index];
+                    const autoMan = false;
+                    const timer = 0;
+                    const stepNo = 1;
+
+                    const probeData = probeDataArray[gaugeIndex - 1];
+
+                    let e_value = 0, d_value = 0, o1_value = 0, a1_value = 0, b_value = 0, b1_value = 0;
+
+                    if (probeData) {
+                        e_value = probeData.e || 0;
+                        d_value = probeData.d || 0;
+                        o1_value = probeData.o1 || 0;
+                        a1_value = probeData.a1 || 0;
+                        b_value = probeData.b || 0;
+                        b1_value = probeData.b1 || 0;
+                    }
+
+                    // Update UI
+                    $('#para_name' + gaugeIndex).val(`CHANNEL-${channel}`);
+                    $('#lsl_' + gaugeIndex).val(` ${lsl}`).css('color', 'purple');
+                    $('#nominal_' + gaugeIndex).val(`${nominal}`);
+                    $('#usl_' + gaugeIndex).val(` ${usl}`).css('color', 'purple');
+
+                    // Collect data for batch display later
+                    displayDataList.push({
+                        parameterName, probeNumber, lowMaster, highMaster, lsl, usl, ltl, utl,
+                        stepNo, autoMan, timer, digits, e_value, d_value, o1_value,
+                        gaugeIndex, a1_value, parameter_factor_values, single_double,
+                        b_value, b1_value
+                    });
+
+                    gaugeIndex++;
+                });
+
+                // ✅ Step 3: Call displaySerialData() for each item AFTER loop — simultaneously
+                displayDataList.forEach(data => {
+                    displaySerialData(
+                        data.parameterName, data.probeNumber, data.lowMaster, data.highMaster,
+                        data.lsl, data.usl, data.ltl, data.utl,
+                        data.stepNo, data.autoMan, data.timer, data.digits,
+                        data.e_value, data.d_value, data.o1_value,
+                        data.gaugeIndex, data.a1_value, data.parameter_factor_values,
+                        data.single_double, data.b_value, data.b1_value
+                    );
+                });
+
+
+
+
+                const lsl = response.lsl_array;
+                const usl = response.usl_array;
+                const ltl = response.ltl_array;
+                const utl = response.utl_array;
+                                
+                const measurement_dataArray = response.measurement_data;
+                console.log("measurement_dataArray", measurement_dataArray);
+
+                const tableBody = document.getElementById("table_body");
+                const parameterNames = response.parameter_name_array;
+
+                // Clear existing rows
+                tableBody.innerHTML = "";
+
+                parameterNames.forEach((name, index) => {
+                    const i = index + 1;
+
+                    const row = document.createElement("tr");
+                    row.id = `row_${i}`;
+                    row.style.display = "";
+
+                    // Get limit values from arrays
+                    const lslVal = parseFloat(lsl[index]);
+                    const uslVal = parseFloat(usl[index]);
+                    const ltlVal = parseFloat(ltl[index]);
+                    const utlVal = parseFloat(utl[index]);
+
+                    // Find corresponding measurement data by parameter name
+                    const matchingData = measurement_dataArray.find(data => data.parameter_name === name);
+
+                    const output = matchingData ? parseFloat(matchingData.output) : "";
+                    const max_value = matchingData ? matchingData.max_value : "";
+                    const min_value = matchingData ? matchingData.min_value : "";
+                    const tir_value = matchingData ? matchingData.tir_value : "";
+
+                    // Create the row first
+                    row.innerHTML = `
+                        <td>${i}</td>
+                        <td><input type="text" id="param_${i}" value="${name}"></td>
+                        <td><input type="text" id="cur_${i}" value="${output}"></td>
+                        <td><input type="text" id="max_${i}" value="${max_value}"></td>
+                        <td><input type="text" id="min_${i}" value="${min_value}"></td>
+                        <td><input type="text" id="tir_${i}" value="${tir_value}"></td>
+                    `;
+
+                    tableBody.appendChild(row);
+
+                    // 🌈 Apply background color logic
+                    const outputBox = document.getElementById(`cur_${i}`);
+
+                    if (!isNaN(output) && outputBox) {
+                        if (output < ltlVal) {
+                            outputBox.style.backgroundColor = "red";
+                        } else if (output >= ltlVal && output < lslVal) {
+                            outputBox.style.backgroundColor = "yellow";
+                        } else if (output >= lslVal && output <= uslVal) {
+                            outputBox.style.backgroundColor = "#00ff00"; // Green
+                        } else if (output > uslVal && output <= utlVal) {
+                            outputBox.style.backgroundColor = "yellow";
+                        } else if (output > utlVal) {
+                            outputBox.style.backgroundColor = "red";
+                        }
+                    }
+                });
+
+
+
+
+
+
+
+
+            // Update the global totalSteps variable
+            const stepNo = response.step_no_array;
+            totalSteps = Math.max(...stepNo); // Find the largest step number
+            console.log("Number of Steps:", totalSteps);
+
+            // Log the totalSteps after it has been updated
+            console.log("Global totalSteps (after update):", totalSteps);
+
+            // Iterate through the parameter values and display all fields for each parameter
+            const parameterValues = response.parameter_values;
+
+            console.log("parameterValues",parameterValues)
+          
+
+if (response.punch_no_value === false) {
+
+
+    const punchOverlay = document.getElementById('punch_no_container');
+punchOverlay.style.display = 'flex';
+
+const punchBox = punchOverlay.querySelector('.punch_no-box');
+if (punchBox) {
+    punchBox.style.display = 'none';
+}
+
+            // Enable function keys after pressing Enter
+    document.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter') {
+            document.getElementById('punch_no_container').style.display = 'none';
+
+            let notificationBar = document.getElementById('notification_bar');
+notificationBar.value = `DO MEASUREMENT FOR STEP ${currentStep} `;
+
+              
+            setTimeout(() => {
+    const restBtn = document.getElementById('rest-btn');
+    const autoManArray = response.auto_man_array || [];
+
+    console.log("autoManArray[0]:", autoManArray[0]);
+
+    if (restBtn) {
+        restBtn.style.display = 'block';
+
+        if (autoManArray[0] === true) {
+            console.log("Disabling restBtn due to autoManArray[0] === true");
+            restBtn.disabled = true;
+            restBtn.style.filter = 'blur(3px)';
+            restBtn.style.pointerEvents = 'none';
+        } else {
+            console.log("Enabling restBtn because autoManArray[0] !== true");
+            restBtn.disabled = false;
+            restBtn.style.filter = '';
+            restBtn.style.pointerEvents = '';
+        }
+    }
+}, 100); // Delay for 100ms to allow DOM to render fully
+
+            
+    updateUI(responseData);
+   
+
+
+
+            
+          
+
+            // allowFunctionKeys = true; // Now enable F4 and F5
+
+
+
+            button.disabled = false;
+            button.style.filter = "";
+            button.style.pointerEvents = "";
+
+            // Disable F-key buttons during measurement
+            const functionButtons = ["master_btn", "model_btn", "live_spc_btn", "report_btn_main", "menu_btn"];
+            functionButtons.forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.disabled = true;
+                    btn.style.filter = "blur(2px)";
+                    btn.style.pointerEvents = "none";
+                }
+            });
+         // ✅ Clear only measurement values
+         parameterNames.forEach((name, index) => {
+            const i = index + 1;
+            const curInput = document.getElementById(`cur_${i}`);
+            const maxInput = document.getElementById(`max_${i}`);
+            const minInput = document.getElementById(`min_${i}`);
+            const tirInput = document.getElementById(`tir_${i}`);
+
+            if (curInput) {
+        curInput.value = "";
+        curInput.style.backgroundColor = ""; // ✅ Clear color
+    }
+            if (maxInput) maxInput.value = "";
+            if (minInput) minInput.value = "";
+            if (tirInput) tirInput.value = "";
+        });
+    }
+
+    handleKeyPress(event); // For F4/F5 handling
+});
+            }
+
+        },
+        error: function (xhr, status, error) {
+            console.error('Error:', error);
+        }
+    });
+}
+
+
+
+
+
+let currentStep = 1; // Ensure currentStep is an integer
+
+// Function to update UI based on current step
+function updateUI(responseData) {
+    if (!responseData || typeof responseData !== 'object') {
+        console.error("Error: responseData is undefined or not an object", responseData);
+        return;
+    }
+
+    if (!responseData.stepNoArray) {
+        console.error("Error: stepNoArray is missing in responseData", responseData);
+        return;
+    }
+
+    let indices = responseData.stepNoArray
+        .map((step, index) => parseInt(step) === currentStep ? index : -1)
+        .filter(index => index !== -1);
+
+    console.log("Matching Indices:", indices);
+
+    let totalGauges = 4; // Total number of available gauges
+
+    // Loop through all containers to clear values & apply blur effect initially
+    for (let i = 1; i <= totalGauges; i++) {
+        let container = $('#sub_container_' + i);
+        
+        // Clear input fields inside the container
+        container.find('input, textarea').val('');
+        
+        // Explicitly clear Output_box
+        container.find('.Output_box').val('');
+        
+        // Apply blur effect to all initially
+        container.css({ 'filter': 'blur(5px)', 'pointer-events': 'none', 'opacity': '0.5' });
+    }
+
+    // Now, update only the required gauges
+    indices.forEach((index, displayIndex) => {
+        let gaugeIndex = displayIndex + 1; // 1-based indexing for UI elements
+        console.log(`Updating Gauge ${gaugeIndex} with index ${index}`);
+
+        // Extract values properly
+        const parameterName = responseData.parameterNameArray[index];
+        const probeNumber = responseData.channelNoArray[index];
+        const lowMaster = responseData.lowMasterArray[index];
+        const highMaster = responseData.highMasterArray[index];
+        const lsl = responseData.lslArray[index];
+        const usl = responseData.uslArray[index];
+        const ltl = responseData.ltlArray[index];
+        const utl = responseData.utlArray[index];
+        const stepNo = responseData.stepNoArray[index];
+        const autoMan = responseData.autoManArray[index];
+        const timer = responseData.timerArray[index];
+        const digits = responseData.digitsArray[index];
+        const single_double = responseData.singleDoubleArray[index]; 
+        const parameter_factor_values = responseData.parameter_factor_values;
+
+        let e_value = 0, d_value = 0, o1_value = 0, a1_value = 0 ,b_value = 0,b1_value = 0;
+        let probeData = responseData.parameterValues.find(item => item.probe_number === String(probeNumber));
+
+
+
+
+
+
+
+
+
+        if (probeData) {
+            e_value = probeData.e || 0;
+            d_value = probeData.d || 0;
+            o1_value = probeData.o1 || 0;
+            a1_value = probeData.a1 || 0;
+            b_value = probeData.b || 0;
+            b1_value = probeData.b1 || 0;
+            console.log(`Probe Number: ${probeData.probe_number}, E: ${e_value}, D: ${d_value}, O1: ${o1_value} , B:${b_value},B1:${b1_value}`);
+        } else {
+            console.log("No Probe Data Found for Channel:", probeNumber);
+        }
+
+        // Update UI Elements
+        $('#para_name' + gaugeIndex).val(parameterName);
+        $('#lsl_' + gaugeIndex).val(` ${lsl}`).css('color', 'purple');
+        $('#nominal_' + gaugeIndex).val(` ${responseData.nominalArray[index]}`);
+        $('#usl_' + gaugeIndex).val(` ${usl}`).css('color', 'purple');
+
+        // Ensure displaySerialData is called correctly
+        if (stepNo === currentStep.toString()) {
+            displaySerialData(
+                parameterName, probeNumber, lowMaster, highMaster, lsl, usl, ltl, utl, 
+                stepNo, autoMan, timer, digits, e_value, d_value, o1_value, gaugeIndex, a1_value,parameter_factor_values,single_double,b_value,b1_value
+            );
+        }
+
+        // Remove blur effect from used containers
+        $('#sub_container_' + gaugeIndex).css({ 'filter': 'none', 'pointer-events': 'auto', 'opacity': '1' });
+
+        // Handle textarea input dynamically
+        const textareaId = mapProbeToTextareaId(probeNumber);
+        console.log("textareaId:", textareaId);
+
+        const textarea = document.getElementById(textareaId);
+        if (textarea) {
+            // Remove existing event listener to avoid multiple bindings
+            textarea.removeEventListener('input', handleTextareaInput);
+            textarea.addEventListener('input', handleTextareaInput);
+
+            function handleTextareaInput() {
+                let textareaValue = (textarea.value.trim() === '' || isNaN(parseFloat(textarea.value))) ? 0 : parseFloat(textarea.value);
+
+                if (stepNo === currentStep.toString()) {
+                    displaySerialData(
+                        parameterName, probeNumber, lowMaster, highMaster, lsl, usl, ltl, utl, 
+                        stepNo, autoMan, timer, digits, e_value, d_value, o1_value, gaugeIndex, a1_value,parameter_factor_values,single_double,b_value,b1_value
+                    );
+                }
+            }
+        }
+    });
+}
+
+
+
+
+
+
+
+
+// Global variables
+let displayOutputs = []; // Stores displayOutput values for all steps
+let isStart = true; // Tracks the current state of the button
+let updateInterval = null; // Stores interval reference
+let notificationBar;
+let button;
+
+// Initialize elements
+function initElements() {
+    button = document.getElementById('rest-btn');
+    notificationBar = document.getElementById('notification_bar');
+
+    if (!button || !notificationBar) {
+        console.error("Required elements not found!");
+        return;
+    }
+
+    button.addEventListener('click', handleAction);
+    document.addEventListener('keydown', handleKeyPress);
+    
+    updateUI(); // Initialize UI for step 1
+}
+
+// Handle button click
+function handleAction() {
+    if (isStart) {
+        startAction();
+    } else {
+        stopAction();
+    }
+    isStart = !isStart; // Toggle the state
+}
+
+// // Start measurement
+// function startAction() {
+//     console.log(`Start action triggered for Step ${currentStep}!`);
+//     notificationBar.value = `MEASUREMENT IS STARTING FOR STEP ${currentStep} `;
+//     updateButton(` STOP[F5]- Step ${currentStep}`, 'stop-btn');
+
+    
+
+//     let indices = getStepIndices();
+//     console.log("indices iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii",indices)
+//     updateInterval = setInterval(() => {
+//     console.log("======= Starting new interval =======");
+//     console.log("🔍 Full gaugeOutputs:", JSON.stringify(gaugeOutputs, null, 2));
+
+//     Object.entries(gaugeOutputs).forEach(([groupKey, gaugeGroup]) => {
+//         console.log(`📦 Group Key: ${groupKey}, Gauge Group:`, gaugeGroup);
+
+//         Object.entries(gaugeGroup).forEach(([key1, value1]) => {
+//             console.log(`🔑 Intermediate Key: ${key1}, Value:`, value1);
+
+//             // If value1 is a nested object (like {3: 12.47})
+//             if (typeof value1 === 'object' && value1 !== null) {
+//                 Object.entries(value1).forEach(([gaugeIndexStr, val]) => {
+//                     let gaugeIndex = parseInt(gaugeIndexStr);
+//                     console.log(`✅ Calling updateMaxMinTir for gaugeIndex: ${gaugeIndex}`);
+//                     updateMaxMinTir(gaugeIndex);
+//                 });
+//             } else {
+//                 // Just in case it's not an object
+//                 let gaugeIndex = parseInt(key1);
+//                 console.log(`✅ Calling updateMaxMinTir for gaugeIndex: ${gaugeIndex}`);
+//                 updateMaxMinTir(gaugeIndex);
+//             }
+//         });
+//     });
+// }, 100);
+
+// }
+
+
+function startAction() {
+    if (autoStartedSteps.has(currentStep)) return;
+    autoStartedSteps.add(currentStep);
+
+    console.log(`Start action triggered for Step ${currentStep}!`);
+    notificationBar.value = `MEASUREMENT IS STARTING FOR STEP ${currentStep} `;
+    updateButton(` STOP[F5]- Step ${currentStep}`, 'stop-btn');
+
+    let indices = getStepIndices();
+    console.log("indices iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", indices);
+    updateInterval = setInterval(() => {
+        console.log("======= Starting new interval =======");
+        console.log("🔍 Full gaugeOutputs:", JSON.stringify(gaugeOutputs, null, 2));
+
+        Object.entries(gaugeOutputs).forEach(([groupKey, gaugeGroup]) => {
+            Object.entries(gaugeGroup).forEach(([key1, value1]) => {
+                if (typeof value1 === 'object' && value1 !== null) {
+                    Object.entries(value1).forEach(([gaugeIndexStr, val]) => {
+                        let gaugeIndex = parseInt(gaugeIndexStr);
+                        console.log(`✅ Calling updateMaxMinTir for gaugeIndex: ${gaugeIndex}`);
+                        updateMaxMinTir(gaugeIndex);
+                    });
+                } else {
+                    let gaugeIndex = parseInt(key1);
+                    console.log(`✅ Calling updateMaxMinTir for gaugeIndex: ${gaugeIndex}`);
+                    updateMaxMinTir(gaugeIndex);
+                }
+            });
+        });
+    }, 100);
+}
+
+
+// Stop measurement
+function stopAction() {
+    console.log(`Stop action triggered for Step ${currentStep}!`);
+    notificationBar.value = `MEASUREMENT IS COMPLETED FOR STEP ${currentStep} `;
+    updateButton(`START[F4] - Step ${currentStep + 1}`, 'start-btn');
+    clearInterval(updateInterval);
+
+    let indices = getStepIndices();
+    let container = indices.length;
+    let parameterNames = indices.map(index => responseData.parameterNameArray[index]);
+
+    updateTableValues(currentStep, indices, parameterNames, container);
+    clearMaxMinTirFields(indices);
+    checkFinalStep();
+    updateUI(responseData);
+}
+
+// Get indices for current step
+function getStepIndices() {
+    return responseData.stepNoArray
+        .map((step, index) => parseInt(step) === currentStep ? index : -1)
+        .filter(index => index !== -1);
+}
+
+// Clear min/max/tir input fields
+function clearMaxMinTirFields(indices) {
+    indices.forEach((index, displayIndex) => {
+        let gaugeIndex = displayIndex + 1;
+        ['max', 'min', 'tir'].forEach(field => {
+            let input = document.getElementById(`${field}${gaugeIndex}`);
+            if (input) input.value = "";
+        });
+    });
+}
+
+// Check if it's the final step
+function checkFinalStep() {
+    if (currentStep < totalSteps) {
+        currentStep++;
+    } else {
+        console.log("All steps completed!");
+        
+        notificationBar.value = "YOU HAVE COMPLETED THE MEASUREMENT FOR THIS JOB. DO THE NEXT JOB.";
+        updateButton("START[F4]", "start-btn");
+        finalizeUI();
+        checkOverallStatus();
+        collectFinalData();
+
+
+        // Re-enable F-key buttons
+const functionButtons = ["master_btn", "model_btn", "live_spc_btn", "report_btn_main", "exit_btn", "menu_btn"];
+functionButtons.forEach(id => {
+    const btn = document.getElementById(id);
+    if (btn) {
+        btn.disabled = false;
+        btn.style.filter = "none";
+        btn.style.pointerEvents = "auto";
+    }
+});
+
+    }
+}
+
+// Check and update overall status based on row colors
+function checkOverallStatus() {
+    console.log("Final Step Reached: Checking All Rows");
+
+    let isRed = false;
+    let isYellow = false;
+    let overallStatus = document.getElementById("overall_status");
+
+    for (let i = 1; i <= 21; i++) {
+        let curInput = document.getElementById(`cur_${i}`);
+
+        if (curInput) {
+            let bgColor = window.getComputedStyle(curInput).backgroundColor;
+            console.log(`Row ${i} Background Color: ${bgColor}`);
+
+            if (bgColor === "rgb(255, 0, 0)") {  // Red color
+                isRed = true;
+            } else if (bgColor === "rgb(255, 255, 0)") {  // Yellow color
+                isYellow = true;
+            }
+        } else {
+            console.warn(`Row ${i} not found.`);
+        }
+    }
+
+    // Set overall status based on color conditions
+    if (isRed) {
+        overallStatus.value = "REJECT";
+        overallStatus.style.backgroundColor = "red";
+    } else if (isYellow) {
+        overallStatus.value = "REWORK";
+        overallStatus.style.backgroundColor = "yellow";
+    } else {
+        overallStatus.value = "ACCEPT";
+        overallStatus.style.backgroundColor = "#00ff00";
+    }
+}
+
+// Disable button after completion
+function finalizeUI() {
+    button.disabled = true;
+    button.style.opacity = "0.5";
+    button.style.pointerEvents = "auto";
+}
+
+
+
+// Collect data from the final step
+function collectFinalData() {
+    console.log("🚀 Final Step Reached: Collecting Data");
+
+    let paramValues = [], curValues = [], maxValues = [], minValues = [], tirValues = [];
+    let curBackgroundColors = [], statusValues = [];
+
+    // Define the color-to-status mapping
+    const statusMap = {
+        "rgb(0, 255, 0)": "ACCEPT",  // Green
+        "rgb(255, 255, 0)": "REWORK", // Yellow
+        "rgb(255, 0, 0)": "REJECT"    // Red
+    };
+
+    for (let i = 1; i <= 21; i++) {
+        ['param', 'cur', 'max', 'min', 'tir'].forEach(field => {
+            let input = document.getElementById(`${field}_${i}`);
+            if (input && input.value.trim()) {
+                eval(`${field}Values`).push(input.value.trim());
+
+                // Log collected value
+                console.log(`${field.toUpperCase()}_${i}:`, input.value.trim());
+
+                // If the field is "cur", collect and map background color to status
+                if (field === 'cur') {
+                    let bgColor = window.getComputedStyle(input).backgroundColor;
+                    let status = statusMap[bgColor] || "UNKNOWN"; // Default to UNKNOWN if no match
+
+                    curBackgroundColors.push(bgColor);
+                    statusValues.push(status);
+
+                    console.log(`CUR_${i} Background Color:`, bgColor);
+                    console.log(`CUR_${i} Status:`, status);
+                }
+            } else {
+                console.log(`${field.toUpperCase()}_${i}: (No Data or Element Missing)`);
+            }
+        });
+    }
+
+    console.log("📊 Collected Data:");
+    console.log("paramValues:", paramValues);
+    console.log("curValues:", curValues);
+    console.log("curBackgroundColors:", curBackgroundColors);
+    console.log("statusValues:", statusValues);
+    console.log("maxValues:", maxValues);
+    console.log("minValues:", minValues);
+    console.log("tirValues:", tirValues);
+
+    DataToSend(paramValues, curValues, maxValues, minValues, tirValues,statusValues);
+}
+
+
+let allowFunctionKeys = false; // Block F4 and F5 initially
+    // Example flag – set this based on your app logic
+
+    // Main handler for F4 and F5 keys
+    function handleKeyPress(event) {
+        if (!allowFunctionKeys) return; // Ignore if not allowed yet
+
+        if ((event.key === 'F4' && isStart) || (event.key === 'F5' && !isStart)) {
+            event.preventDefault();
+            handleAction();
+        }
+    }
+
+
+// Update button text and ID
+function updateButton(text, id) {
+    button.innerHTML = text;
+    button.id = id;
+}
+
+// Initialize when DOM is ready
+document.addEventListener('DOMContentLoaded', initElements);
+
+
+
+
+
+
+
+
+
+// function handleActionStart(timer) { 
+    
+//     const button = document.querySelector('[id="rest-btn"],[id="start-btn"]');
+//     console.log("button",button)
+//     const notificationBar = document.getElementById('notification_bar');
+
+    
+//     if (!button) {
+//         console.error("Button not found!");
+//         return;
+//     }
+
+//     let updateInterval = null;
+//     let stepNow = currentStep; // Store the current step at function start
+
+//     console.log(`Start action triggered for Step ${stepNow}!`);
+//     notificationBar.value = `MEASUREMENT IS STARTING FOR STEP ${stepNow} `;
+
+//     button.innerHTML = `STOP[F5] - Step ${stepNow}`;
+//     button.id = 'stop-btn';
+
+//     button.disabled = true; // Disable button
+//             button.style.filter = "blur(3px)"; // Apply blur effect
+//             button.style.pointerEvents = "none"; // Disable interactions
+
+//     let indices = responseData.stepNoArray
+//         .map((step, index) => parseInt(step) === stepNow ? index : -1)
+//         .filter(index => index !== -1);
+
+//         updateInterval = setInterval(() => {
+//     console.log("======= Starting new interval =======");
+//     console.log("🔍 Full gaugeOutputs:", JSON.stringify(gaugeOutputs, null, 2));
+
+//     Object.entries(gaugeOutputs).forEach(([groupKey, gaugeGroup]) => {
+//         console.log(`📦 Group Key: ${groupKey}, Gauge Group:`, gaugeGroup);
+
+//         Object.entries(gaugeGroup).forEach(([key1, value1]) => {
+//             console.log(`🔑 Intermediate Key: ${key1}, Value:`, value1);
+
+//             // If value1 is a nested object (like {3: 12.47})
+//             if (typeof value1 === 'object' && value1 !== null) {
+//                 Object.entries(value1).forEach(([gaugeIndexStr, val]) => {
+//                     let gaugeIndex = parseInt(gaugeIndexStr);
+//                     console.log(`✅ Calling updateMaxMinTir for gaugeIndex: ${gaugeIndex}`);
+//                     updateMaxMinTir(gaugeIndex);
+//                 });
+//             } else {
+//                 // Just in case it's not an object
+//                 let gaugeIndex = parseInt(key1);
+//                 console.log(`✅ Calling updateMaxMinTir for gaugeIndex: ${gaugeIndex}`);
+//                 updateMaxMinTir(gaugeIndex);
+//             }
+//         });
+//     });
+// }, 100);
+
+
+//     // ✅ Stop after `timer` seconds and proceed to the next step
+//     setTimeout(() => {
+//         console.log(`Stop action triggered for Step ${stepNow}!`);
+//         notificationBar.value = `MEASUREMENT IS COMPLETED FOR STEP ${stepNow} `;
+
+//         button.innerHTML = `START[F4] - Step ${stepNow + 1}`;  // Now correctly displays next step
+//         button.id = 'start-btn';
+//         clearInterval(updateInterval);
+
+//         // Extract indices for the current step
+//         let container = indices.length;
+//         let parameterNames = indices.map(index => responseData.parameterNameArray[index]);
+
+//         updateTableValues(stepNow, indices, parameterNames, container);
+
+//         // ✅ Clear max, min, and tir fields
+//         indices.forEach((index, displayIndex) => {
+//             let gaugeIndex = displayIndex + 1;
+//             let maxField = document.getElementById(`max${gaugeIndex}`);
+//             let minField = document.getElementById(`min${gaugeIndex}`);
+//             let tirField = document.getElementById(`tir${gaugeIndex}`);
+
+//             if (maxField) maxField.value = "";
+//             if (minField) minField.value = "";
+//             if (tirField) tirField.value = "";
+//         });
+
+//         button.disabled = false; // Disable button
+//             button.style.filter = ""; // Apply blur effect
+//             button.style.pointerEvents = ""; // Disable interactions
+
+         
+//         // ✅ Ensure `currentStep` only increments once per execution
+//         if (button.id === 'start-btn') {
+//             currentStep = stepNow + 1; // Ensure only a single increment
+//             updateUI(responseData);
+//             if (currentStep > totalSteps) {
+       
+//         console.log("All steps completed!");
+//         notificationBar.value = "YOU HAVE COMPLETED THE MEASUREMENT FOR THIS JOB. DO THE NEXT JOB.";
+//         updateButton("START[F4]", "start-btn");
+//         finalizeUI();
+//         checkOverallStatus();
+//         collectFinalData();
+//     }
+//         }
+
+//     }, timer * 1000);
+// }
+
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+let gaugeOutputs = {};
+let probeIntervals = {};
+let activeStep = null;
+let stepAutomationMap = {};
+let autoStartedSteps = new Set();
+let autoStartTimeouts = {};
+let autoStopTimeouts = {};
+
+function displaySerialData(
+    parameterName, probeNumber, lowMaster, highMaster, lsl, usl, ltl, utl,
+    stepNo, autoMan, timer, digits, e_value, d_value, o1_value,
+    gaugeIndex, a1_value, parameter_factor_values, single_double, b_value, b1_value
+) {
+    console.log("StepNo:", stepNo);
+    console.log("parameterName:", parameterName);
+    console.log("autoMan:", autoMan);
+    console.log("timer:", timer);
+    console.log("a1_value:", a1_value);
+    console.log("gaugeIndex:", gaugeIndex);
+    console.log("probeNumber:", probeNumber);
+    console.log("single_double :", single_double);
+    console.log("b_value:", b_value);
+    console.log("b1_value:", b1_value);
+    console.log("parameter_factor_values ", parameter_factor_values);
+
+    stepAutomationMap[stepNo] = autoMan;
+    console.log(`Step ${stepNo} is ${autoMan ? 'AUTO' : 'MANUAL'}`);
+
+    allowFunctionKeys = !autoMan;
+    console.log(`${allowFunctionKeys ? '✅' : '❌'} F4/F5 ${allowFunctionKeys ? 'ENABLED' : 'DISABLED'} for Step ${stepNo}`);
+
+    let notificationBar = document.getElementById('notification_bar');
+    const button = document.querySelector('[id="rest-btn"],[id="start-btn"]');
+
+   // Enable/Disable button based on mode (AUTO vs MANUAL)
+if (button) {
+    if (autoMan === true) {
+        button.disabled = true;
+        button.style.filter = "blur(3px)";
+        button.style.pointerEvents = "none";
+        console.log("🔒 AUTO MODE: Button disabled for Step", stepNo);
+    } else {
+        button.disabled = false;
+        button.style.filter = "none";
+        button.style.pointerEvents = "auto";
+        console.log("🔓 MANUAL MODE: Button enabled for Step", stepNo);
+    }
+}
+
+   
+
+    const textareaId = mapProbeToTextareaId(probeNumber);
+    const textarea = document.getElementById(textareaId);
+
+    if (!textarea) {
+        console.warn(`Textarea with ID ${textareaId} not found.`);
+        return;
+    }
+
+    if (activeStep !== stepNo) {
+        console.log(`Step changed from ${activeStep} to ${stepNo}. Clearing previous intervals.`);
+        clearAllIntervals();
+        activeStep = stepNo;
+    }
+
+    const intervalKey = `${stepNo}_${probeNumber}_${gaugeIndex}`;
+    console.log("intervalKey:", intervalKey);
+
+    if (probeIntervals[intervalKey]) {
+        clearInterval(probeIntervals[intervalKey]);
+        delete probeIntervals[intervalKey];
+    }
+
+    let lastValue = null;
+
+    function updateCalculation() {
+        const newSerialData = !isNaN(parseFloat(textarea.value)) ? parseFloat(textarea.value) : 0;
+
+        if (newSerialData === lastValue) return;
+        lastValue = newSerialData;
+
+        const numericEValue = parseFloat(e_value) || 0;
+        const numericDValue = parseFloat(d_value) || 0;
+        const numericO1Value = parseFloat(o1_value) || 0;
+        const numericBValue = parseFloat(b_value) || 0;
+        const numericB1Value = parseFloat(b1_value) || 0;
+
+        let displayOutput;
+
+        if (single_double === true) {
+            const displayOutput1 = (newSerialData - numericB1Value) * numericDValue;
+            displayOutput = displayOutput1 + numericEValue + numericBValue;
+            console.log(`🔹 Using SINGLE mastering formula for gauge ${gaugeIndex}`);
+        } else {
+            displayOutput = numericEValue + (newSerialData * numericDValue + numericO1Value);
+            console.log(`🔸 Using DOUBLE mastering formula for gauge ${gaugeIndex}`);
+        }
+
+        displayOutput = parseFloat(displayOutput.toFixed(digits));
+
+        for (let i = 0; i < parameter_factor_values.length; i++) {
+            const factor = parameter_factor_values[i];
+            const factorName = factor.parameter_name;
+            const method = factor.method;
+            const factorValue = parseFloat(factor.value);
+
+            if (factorName === parameterName) {
+                displayOutput = method === '+' ? displayOutput + factorValue : displayOutput - factorValue;
+                displayOutput = parseFloat(displayOutput.toFixed(digits));
+            }
+        }
+
+        if (!isNaN(displayOutput)) {
+            gaugeOutputs[stepNo] = gaugeOutputs[stepNo] || {};
+            gaugeOutputs[stepNo][probeNumber] = gaugeOutputs[stepNo][probeNumber] || {};
+            gaugeOutputs[stepNo][probeNumber][gaugeIndex] = displayOutput;
+        }
+
+        console.log(`displayOutput for Gauge ${gaugeIndex} (Step ${stepNo}, Probe ${probeNumber}):`, displayOutput);
+
+        const outputBoxId = `Output_box${gaugeIndex}`;
+        const outputBox = document.getElementById(outputBoxId);
+
+        if (outputBox) {
+            outputBox.value = displayOutput.toFixed(digits);
+
+            if (displayOutput < ltl) {
+                outputBox.style.backgroundColor = "red";
+            } else if (displayOutput >= ltl && displayOutput < lsl) {
+                outputBox.style.backgroundColor = "yellow";
+            } else if (displayOutput >= lsl && displayOutput <= usl) {
+                outputBox.style.backgroundColor = "#00ff00";
+            } else if (displayOutput > usl && displayOutput <= utl) {
+                outputBox.style.backgroundColor = "yellow";
+            } else if (displayOutput > utl) {
+                outputBox.style.backgroundColor = "red";
+            }
+        } else {
+            console.warn(`Output box ${outputBoxId} not found`);
+        }
+
+        const ltl_value = (parseFloat(ltl) - 0.030).toFixed(4);
+        const utl_value = (parseFloat(utl) + 0.030).toFixed(4);
+        const inRange = displayOutput >= ltl_value && displayOutput <= utl_value;
+        const autoKey = `${stepNo}_${probeNumber}_${gaugeIndex}`;
+
+        // ✅ AUTO MODE: Trigger start and stop based on timer
+        if (autoMan && timer && inRange) {
+            console.log(`🟢 AUTO: Value ${displayOutput} in range. Starting timer for Step ${stepNo}...`);
+
+            if (!autoStartTimeouts[autoKey]) {
+                autoStartTimeouts[autoKey] = setTimeout(() => {
+                    if (!autoStartedSteps.has(stepNo)) {
+                        autoStartedSteps.add(stepNo);
+                        startAction();
+
+                        // ⏱ Schedule stopAction after timer seconds
+                        if (!autoStopTimeouts[autoKey]) {
+                            autoStopTimeouts[autoKey] = setTimeout(() => {
+                                console.log(`⏱️ AUTO: Timer done. Stopping Step ${stepNo}`);
+                                stopAction();
+                                delete autoStopTimeouts[autoKey];
+                            }, timer * 1000);
+                            console.log(`⏳ STOP will trigger in ${timer} seconds for Step ${stepNo}`);
+                        }
+                    }
+
+                    delete autoStartTimeouts[autoKey];
+                }, 500); // Small delay before triggering START
+            }
+
+        } else {
+            // ❌ Cancel timers if out of range
+            if (autoStartTimeouts[autoKey]) {
+                console.log(`🛑 AUTO: Cancelling start timer for ${autoKey}`);
+                clearTimeout(autoStartTimeouts[autoKey]);
+                delete autoStartTimeouts[autoKey];
+            }
+            if (autoStopTimeouts[autoKey]) {
+                console.log(`🛑 AUTO: Cancelling stop timer for ${autoKey}`);
+                clearTimeout(autoStopTimeouts[autoKey]);
+                delete autoStopTimeouts[autoKey];
+            }
+        }
+    }
+
+    probeIntervals[intervalKey] = setInterval(updateCalculation, 100);
+}
+
+function clearAllIntervals() {
+    for (let key in probeIntervals) {
+        clearInterval(probeIntervals[key]);
+        delete probeIntervals[key];
+    }
+    console.log("All previous intervals cleared.");
+}
+
+
+
+
+
+
+
+
+
+function updateMaxMinTir(gaugeIndex) {
+    let outputBox = document.getElementById(`Output_box${gaugeIndex}`);
+    console.log("outputBox",outputBox)
+    console.log("gaugeIndex",gaugeIndex)
+
+    if (!outputBox || isNaN(parseFloat(outputBox.value))) {
+        console.warn(`No valid data for Gauge ${gaugeIndex}`);
+        return;
+    }
+
+    let currentValue = parseFloat(outputBox.value);
+
+    // Get corresponding max, min, and tir fields
+    let maxField = document.getElementById(`max${gaugeIndex}`);
+    let minField = document.getElementById(`min${gaugeIndex}`);
+    let tirField = document.getElementById(`tir${gaugeIndex}`);
+
+    // Ensure previous values exist
+    let previousMax = parseFloat(maxField.value) || currentValue;
+    let previousMin = parseFloat(minField.value) || currentValue;
+
+    // Update max and min dynamically
+    let newMax = Math.max(previousMax, currentValue);
+    let newMin = Math.min(previousMin, currentValue);
+    let newTir = ((newMax - newMin) / 2).toFixed(4);
+
+    // Update the fields
+    maxField.value = newMax.toFixed(4);
+    minField.value = newMin.toFixed(4);
+    tirField.value = newTir;
+}
+
+
+
+
+
+
+
+// let maxVisibleRow = 0; // Track the highest row number that should be shown
+
+// function updateTableValues(step, indices, parameterNames, container) {
+//     console.log("Step:", step, "Indices:", indices, "Parameter Names:", parameterNames);
+
+     
+
+//     if (!Array.isArray(parameterNames) || parameterNames.length === 0) {
+//         console.error("parameterNames array is empty or not an array:", parameterNames);
+//         return;
+//     }
+
+//     // Update maxVisibleRow based on the new indices
+//     let newMax = Math.max(...indices.map(i => i + 1));
+//     if (newMax > maxVisibleRow) {
+//         maxVisibleRow = newMax;
+//     }
+
+//     // Show all rows from 1 to maxVisibleRow
+//     for (let i = 1; i <= 21; i++) {
+//         let row = document.getElementById(`row_${i}`);
+//         if (row) row.style.display = (i <= maxVisibleRow) ? "" : "none";
+//     }
+
+//     // Update only the rows we are passed
+//     indices.forEach((index, paramIndex) => {
+//         let rowIndex_table = index + 1;
+
+//         let paramInput = document.getElementById(`param_${rowIndex_table}`);
+//         let curInput = document.getElementById(`cur_${rowIndex_table}`);
+//         let maxInput = document.getElementById(`max_${rowIndex_table}`);
+//         let minInput = document.getElementById(`min_${rowIndex_table}`);
+//         let tirInput = document.getElementById(`tir_${rowIndex_table}`);
+
+//         if (!paramInput) {
+//             console.warn(`paramInput for Row ${rowIndex_table} not found.`);
+//             return;
+//         }
+
+//         let paramName = parameterNames[paramIndex] !== undefined ? parameterNames[paramIndex] : "UNKNOWN";
+//         paramInput.value = paramName;
+
+//         let targetIndex = indices.length === 1 ? container : paramIndex + 1;
+
+//         let outputBox = document.getElementById(`Output_box${targetIndex}`);
+//         let maxBox = document.getElementById(`max${targetIndex}`);
+//         let minBox = document.getElementById(`min${targetIndex}`);
+//         let tirBox = document.getElementById(`tir${targetIndex}`);
+
+//         if (curInput && maxInput && minInput && tirInput && outputBox && maxBox && minBox && tirBox) {
+//             curInput.value = outputBox.value;
+//             maxInput.value = maxBox.value;
+//             minInput.value = minBox.value;
+//             tirInput.value = tirBox.value;
+
+//             outputBox.addEventListener("input", function () {
+//                 let existingBgColor = curInput.style.backgroundColor;
+//                 let computedBgColor = window.getComputedStyle(outputBox).backgroundColor;
+
+//                 if (!existingBgColor || existingBgColor === "rgba(0, 0, 0, 0)" || existingBgColor === "transparent") {
+//                     curInput.style.backgroundColor = computedBgColor;
+//                 }
+//             });
+
+//             outputBox.dispatchEvent(new Event("input"));
+//         } else {
+//             console.warn(`Some elements missing for Row ${targetIndex}`);
+//         }
+//     });
+
+//     const containerDiv = document.getElementById("output_values_container");
+// const lastRow = document.getElementById(`row_${maxVisibleRow}`);
+// if (containerDiv && lastRow) {
+//     lastRow.scrollIntoView({ behavior: "smooth", block: "end" });
+// }
+
+
+// }
+
+
+function updateTableValues(step, indices, parameterNames, container) {
+    console.log("Step:", step, "Indices:", indices, "Parameter Names:", parameterNames);
+
+    if (!Array.isArray(parameterNames) || parameterNames.length === 0) {
+        console.error("parameterNames array is empty or not an array:", parameterNames);
+        return;
+    }
+
+    indices.forEach((index, paramIndex) => {
+    const i = index + 1;
+
+    const paramInput = document.getElementById(`param_${i}`);
+    const curInput = document.getElementById(`cur_${i}`);
+    const maxInput = document.getElementById(`max_${i}`);
+    const minInput = document.getElementById(`min_${i}`);
+    const tirInput = document.getElementById(`tir_${i}`);
+
+    const targetIndex = indices.length === 1 ? container : paramIndex + 1;
+
+    const outputBox = document.getElementById(`Output_box${targetIndex}`);
+    const maxBox = document.getElementById(`max${targetIndex}`);
+    const minBox = document.getElementById(`min${targetIndex}`);
+    const tirBox = document.getElementById(`tir${targetIndex}`);
+
+    if (paramInput && outputBox && maxBox && minBox && tirBox && curInput && maxInput && minInput && tirInput) {
+        paramInput.value = parameterNames[paramIndex] || "UNKNOWN";
+        curInput.value = outputBox.value;
+        maxInput.value = maxBox.value;
+        minInput.value = minBox.value;
+        tirInput.value = tirBox.value;
+
+        // ✅ Directly copy the background color ONCE (no input event needed)
+        const bgColor = window.getComputedStyle(outputBox).backgroundColor;
+        curInput.style.backgroundColor = bgColor;
+    } else {
+        console.warn(`Missing elements for Row ${i}`);
+    }
+});
+
+
+    // Scroll to bottom visible row if needed
+    const containerDiv = document.getElementById("output_values_container");
+    const lastRow = document.getElementById(`row_${Math.max(...indices.map(i => i + 1))}`);
+    if (containerDiv && lastRow) {
+        lastRow.scrollIntoView({ behavior: "smooth", block: "end" });
+    }
+}
+
+
+
+
+function DataToSend(paramValues, curValues, maxValues, minValues, tirValues, statusValues) {
+    $('#loading_spinner').show();
+
+    const overallStatusInput = document.getElementById("overall_status").value;
+    const partModel = document.getElementById("part_model").value;
+    const partName = document.getElementById("part_no").value;
+    const date = document.getElementById("date_time").value;
+    const operator = document.getElementById("operator").value;
+    const shift = document.getElementById("shift").value;
+    const punchNo = document.getElementById("punch_no").value;
+
+     // ✅ Validate top-level mandatory fields first
+     if (!partModel || !partName || !date || !operator || !shift ) {
+        $('#loading_spinner').hide();
+        showNotifications("Please fill all required header fields before submitting.");
+        return;
+    }
+
+    const parameterName = responseData.parameterNameArray;  
+    const lsl = responseData.lslArray;
+    const usl = responseData.uslArray;
+    const ltl = responseData.ltlArray;
+    const utl = responseData.utlArray;
+    const nominal = responseData.nominalArray;
+
+    let dataToSend = [];
+
+    // First, check that all mandatory fields are present
+    for (let i = 0; i < paramValues.length; i++) {
+        if (
+            !paramValues[i] || 
+            !curValues[i] || 
+            !maxValues[i] || 
+            !minValues[i] || 
+            !tirValues[i] || 
+            !statusValues[i] ||
+            !overallStatusInput
+        ) {
+            $('#loading_spinner').hide();
+            showNotifications(`Row ${i + 1} or Overall Status is incomplete. Please fill all fields before submitting.`);
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+            return; // Stop if any field is missing
+           
+        }
+
+        dataToSend.push({
+            date: date,
+            punchNo: punchNo,
+            partModel: partModel,
+            partName: partName,
+            operator: operator,
+            shift: shift,
+            parameterName: paramValues[i],
+            lsl: lsl[i] || "",
+            usl: usl[i] || "",
+            ltl: ltl[i] || "",
+            utl: utl[i] || "",
+            nominal: nominal[i] || "",
+            output: curValues[i],
+            max: maxValues[i],
+            min: minValues[i],
+            tir: tirValues[i],
+            statusCell: statusValues[i],
+            overallStatusInput: overallStatusInput,
+        });
+    }
+
+    console.log("Data being sent to the backend:", dataToSend);
+
+    // All rows valid, proceed to send
+    $.ajax({
+        url: '/measure_data/',
+        type: 'POST',
+        headers: { 'X-CSRFToken': getCSRFToken() },
+        data: JSON.stringify(dataToSend),
+        contentType: 'application/json',
+        success: function (response) {
+            $('#loading_spinner').hide();
+            console.log('Data successfully sent to the backend:', response);
+            showNotification('DATA SAVED', true);
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        },
+        error: function (error) {
+            console.error('Error sending data to the backend:', error);
+            showNotification('Error sending data to the backend.', false);
+            $('#loading_spinner').hide();
+        }
+    });
+}
+
+
+function showNotification(message, isSuccess) {
+    const notifyDiv = document.querySelector('.notify');
+    notifyDiv.innerHTML = message;
+
+    notifyDiv.style.display = 'block';
+    notifyDiv.style.position = 'fixed';
+    notifyDiv.style.top = '10vh';                    // 5% from top
+    notifyDiv.style.left = '50vw';                  // Center horizontally
+    notifyDiv.style.transform = 'translateX(-50%)'; // Center align
+
+    notifyDiv.style.backgroundColor = isSuccess ? 'green' : 'red';
+    notifyDiv.style.color = 'white';
+    notifyDiv.style.padding = '2vh 4vw';            // Vertical and horizontal padding
+    notifyDiv.style.borderRadius = '2vh';
+    notifyDiv.style.fontSize = '2.5vw';             // Font size relative to viewport height
+    notifyDiv.style.textAlign = 'center';
+    notifyDiv.style.zIndex = '9999';
+    notifyDiv.style.fontWeight = 'bold';
+
+
+                 // Minimum width of box
+    notifyDiv.style.width = '80vw';  
+    notifyDiv.style.height = '10vw';             // Responsive max width
+   
+     
+
+    notifyDiv.style.boxShadow = '0 1vh 3vh rgba(0, 0, 0, 0.3)';
+
+    // Hide after 5 seconds
+    setTimeout(() => {
+        notifyDiv.style.display = 'none';
+    }, 5000);
+}
+
+
+  
+// Helper function to get CSRF token from the browser's cookies
+function getCSRFToken() {
+    const csrfToken = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('csrftoken'))
+        ?.split('=')[1];
+    return csrfToken;
+}
+
+
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Function to map probe numbers to textarea IDs
+function mapProbeToTextareaId(probeNumber) {
+    const probeMapping = {
+        1: "probe-A",
+        2: "probe-B",
+        3: "probe-C",
+        4: "probe-D",
+
+        5: "probe-E",
+        6: "probe-F",
+        7: "probe-G",
+        8: "probe-H",
+
+        9: "probe-I",
+        10: "probe-J",
+        11: "probe-K",
+    };
+
+    return probeMapping[probeNumber] || null; // Return null if no mapping is found
+}
+
+
+////////////////////////////////////////////////////////////////////////////
+
+$(document).ready(function () {
+    // Function to trigger the same functionality as button click
+    function triggerAjaxRequest() {
+        const partName = $("#part_model").val(); // Capture the input value
+        $.ajax({
+            url: "{% url 'master' %}", // URL for 'newma' view
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" },
+            data: { part_model: partName }, // Send the part_model
+            success: function (response) {
+                if (response.redirect_url) {
+                    // Redirect to newma and send part_model as a query parameter
+                    window.location.href = response.redirect_url + "?part_model=" + encodeURIComponent(partName);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            },
+        });
+    }
+
+    // Trigger the function when the button is clicked
+    $("#master_btn").click(function () {
+        triggerAjaxRequest();
+    });
+
+    // // Trigger the function when the F1 key is pressed
+    // $(document).keydown(function (e) {
+    //     if (e.key === "F1") { // Check if the pressed key is F1
+    //         e.preventDefault(); // Prevent the default F1 action (help page)
+    //         triggerAjaxRequest(); // Trigger the AJAX request
+    //     }
+    // });
+});
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+function sendPartModelForCount(partModel) {
+    $.ajax({
+        url: "/changed_name/", // URL for 'measurement' view
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" },
+        data: JSON.stringify({ part_names: partModel }), // Send partModel as JSON
+        contentType: "application/json", // Specify JSON content type
+        success: function (response) {
+            console.log("Part model sent successfully:", partModel);
+            console.log("Response from server:", response);
+        },
+        error: function (error) {
+            console.error("Error sending part model:", error);
+        },
+    });
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Event listener for report_btn_main click
+    document.getElementById("report_btn_main").addEventListener("click", function () {
+        // Show the two additional buttons when the main button is clicked
+        document.getElementById("spc_btn").style.display = "inline-block";
+        document.getElementById("report_btn").style.display = "inline-block"; // Show the report button as well
+    });
+
+    // Event listener for the report_btn click (this will trigger the redirect)
+    document.getElementById("report_btn").addEventListener("click", function () {
+        const partName = document.getElementById("part_model").value.trim();
+
+        if (!partName) {
+            showNotifications("Please enter a part model!");
+            return;
+        }
+
+        // Redirect to the report/ page with the part_model as a query parameter
+        const redirectUrl = `/report/?part_model=${encodeURIComponent(partName)}`;
+        window.location.href = redirectUrl;
+    });
+    
+    // Optional: F6 key press listener to trigger the same action as the report_btn click
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "F6") { // Check if F6 key is pressed
+            e.preventDefault(); // Prevent default behavior of F6
+            document.getElementById("report_btn_main").click(); // Simulate a click on the report_btn
+        }
+    });
+
+     // Optional: F6 key press listener to trigger the same action as the report_btn click
+     document.addEventListener("keydown", function (e) {
+        if (e.key === "F8") { // Check if F6 key is pressed
+            e.preventDefault(); // Prevent default behavior of F6
+            document.getElementById("report_btn").click(); // Simulate a click on the report_btn
+        }
+    });
+});
+
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    document.addEventListener("DOMContentLoaded", function () {
+    // Function to handle the click event
+    function handleClickspc() {
+        const partName = document.getElementById("part_model").value.trim();
+
+        if (!partName) {
+            showNotifications("Please enter a part model!");
+            return;
+        }
+
+        // Redirect to the report/ page with the part_model as a query parameter
+        const redirectUrl = `/spc/?part_model=${encodeURIComponent(partName)}`;
+        window.location.href = redirectUrl;
+    }
+
+    // Event listener for the button click
+    document.getElementById("live_spc_btn").addEventListener("click", handleClickspc);
+
+    // // Event listener for the F3 key press
+    // document.addEventListener("keydown", function (e) {
+    //     if (e.key === "F3") { // Check if the pressed key is F3
+    //         e.preventDefault(); // Prevent the default F3 action
+    //         handleClickspc(); // Trigger the handleClick function
+    //     }
+    // });
+});
+
+
+///////////////////////////////////////////////////////////////////////////////////////////
+
+document.addEventListener("DOMContentLoaded", function () {
+    // Function to handle the click event
+    function handleClickspcCharts() {
+        const partName = document.getElementById("part_model").value.trim();
+
+        if (!partName) {
+            showNotifications("Please enter a part model!");
+            return;
+        }
+
+        // Redirect to the report/ page with the part_model as a query parameter
+        const redirectUrl = `/spcCharts/?part_model=${encodeURIComponent(partName)}`;
+        window.location.href = redirectUrl;
+    }
+
+    // Event listener for the button click
+    document.getElementById("spc_btn").addEventListener("click", handleClickspcCharts);
+
+    // Event listener for the F3 key press
+    document.addEventListener("keydown", function (e) {
+        if (e.key === "F7") { // Check if the pressed key is F3
+            e.preventDefault(); // Prevent the default F3 action
+            handleClickspcCharts(); // Trigger the handleClick function
+        }
+    });
+});
+
+
+
+
+
+
+var shiftValues = JSON.parse('{{ shift_time|escapejs }}');
+console.log('Shift values:', shiftValues);
+
+var operator = JSON.parse('{{ user_name|escapejs }}');
+console.log('operator name is this values:', operator);
+
+if (Array.isArray(operator) && operator.length > 0) {
+        document.getElementById('operator').value = operator[0].username;
+    } else {
+        console.error('No operator data found');
+    }
+
+    
+// Function to convert 12-hour time to 24-hour format
+function convertTo24Hour(timeString) {
+    let [time, modifier] = timeString.trim().split(' ');
+    let [hours, minutes, seconds] = time.split(':');
+    if (modifier === 'PM' && hours !== '12') {
+        hours = parseInt(hours, 10) + 12;
+    }
+    if (modifier === 'AM' && hours === '12') {
+        hours = 0;
+    }
+    return `${hours.toString().padStart(2, '0')}:${minutes}:${seconds}`;
+}
+
+// Function to determine and update the shift name based on the current time
+function setDateTimes() {
+    let now = new Date();
+    let currentTime = now.toTimeString().split(' ')[0]; // 'HH:MM:SS'
+    let currentDate = now.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+
+    // Determine the shift based on the current time
+    let shiftName = null;
+    for (let i = shiftValues.length - 1; i >= 0; i--) {
+        let shift = shiftValues[i];
+        let shiftTime = shift.shift_time.trim();  // Trim whitespace from shift_time
+        let shift24HourTime = convertTo24Hour(shiftTime);
+
+        if (currentTime >= shift24HourTime) {
+            shiftName = shift.shift;  // Set the shift name (e.g., "SHIFT-1")
+            break;
+        }
+    }
+
+    // If no shift is found (e.g., if the current time is before all shifts), default to the first shift
+    if (!shiftName) {
+        shiftName = shiftValues[0].shift; // Default to the first shift
+    }
+
+    // Set the shift name in the input box
+    let fromDateElements = document.getElementsByClassName('shift-name');
+    for (let element of fromDateElements) {
+        element.value = shiftName;  // Set the shift name in the input box
+    }
+
+
+}
+
+// Function to update the current date and time in the input box and check for shift change
+function updateClock() {
+    // Get the current date and time
+    var currentDate = new Date();
+    var hours = currentDate.getHours();
+    var minutes = currentDate.getMinutes();
+    var seconds = currentDate.getSeconds();
+    var ampm = hours >= 12 ? 'PM' : 'AM';
+
+    // Format the hours, minutes, and seconds
+    hours = hours % 12;
+    hours = hours ? hours : 12; // Handle midnight (0 hours)
+    minutes = minutes < 10 ? '0' + minutes : minutes;
+    seconds = seconds < 10 ? '0' + seconds : seconds;
+
+    // Create the time string
+    var currentTime = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+
+    // Get the date components
+    var day = currentDate.getDate();
+    var month = currentDate.getMonth() + 1; // Month is zero-based
+    var year = currentDate.getFullYear();
+
+    // Create the date string
+    var currentDateFormatted = day + '/' + month + '/' + year;
+
+    // Set the value of the input box
+    document.getElementById("date_time").value = currentDateFormatted + ' ' + currentTime;
+
+    // Check if current time matches the next shift time
+    checkShiftNotification(currentTime);
+
+    // Call shift notification if needed
+    checkHourlyNotification(currentDate);
+
+    // Call this function again after 1 second
+    setTimeout(updateClock, 1000);
+}
+let lastNotifiedHour = null;
+
+function checkHourlyNotification(currentDate) {
+    const currentHour = currentDate.getHours();     // 0 to 23
+    const currentMinute = currentDate.getMinutes();
+    const currentSecond = currentDate.getSeconds();
+
+    const partModel = document.getElementById("part_model").value;
+
+    // Trigger only at HH:00:00 of each hour
+    if (currentMinute === 0 && currentSecond === 0) {
+        if (lastNotifiedHour !== currentHour) {
+            lastNotifiedHour = currentHour;
+
+            const displayHour = currentHour === 0 ? 12 : (currentHour > 12 ? currentHour - 12 : currentHour);
+            const ampm = currentHour >= 12 ? 'PM' : 'AM';
+
+            console.log("✅ Showing hourly notification at:", currentDate);
+            showNotifications1(`🔔 TIME FOR MASTERING`, partModel);
+        }
+    }
+}
+
+
+// Function to check if the current time matches the next shift time
+function checkShiftNotification(currentTime) {
+    let shiftTime = null;
+    for (let i = 0; i < shiftValues.length; i++) {
+        let shift = shiftValues[i];
+        let shiftTime24Hour = convertTo24Hour(shift.shift_time);
+        if (currentTime >= shiftTime24Hour) {
+            shiftTime = shift.shift_time;
+            break;
+        }
+    }
+
+    // If shift time is found and matches the current time, show notification
+    if (shiftTime && currentTime === shiftTime) {
+        showShiftNotification();
+    }
+}
+
+// Function to get the shift time for a given shift name
+function getShiftTimeForShift(shiftName) {
+    let shift = shiftValues.find(s => s.shift === shiftName);
+    return shift ? shift.shift_time : null;
+}
+
+// Function to format shift time with the current date
+function combineShiftTimeWithCurrentDate(shiftName) {
+    let shiftTime = getShiftTimeForShift(shiftName);
+    if (!shiftTime) {
+        console.error('Shift time not found for shift:', shiftName);
+        return null;
+    }
+
+    let shift24HourTime = convertTo24Hour(shiftTime);
+    let shiftDateTime = new Date();
+    let [hours, minutes, seconds] = shift24HourTime.split(':');
+    
+    shiftDateTime.setHours(parseInt(hours));
+    shiftDateTime.setMinutes(parseInt(minutes));
+    shiftDateTime.setSeconds(parseInt(seconds));
+
+    let day = shiftDateTime.getDate().toString().padStart(2, '0');
+    let month = (shiftDateTime.getMonth() + 1).toString().padStart(2, '0');
+    let year = shiftDateTime.getFullYear();
+
+    let displayHours = shiftDateTime.getHours() % 12 || 12;
+    let ampm = shiftDateTime.getHours() >= 12 ? 'PM' : 'AM';
+    
+    let formattedDateTime = `${year}-${month}-${day} ${displayHours}:${minutes}:${seconds} ${ampm}`;
+    
+    return formattedDateTime;
+}
+
+// Function to send shift data via AJAX
+// Function to send shift data via AJAX with from_date and end_date
+function postShiftData(shiftName) {
+    let fromDate = combineShiftTimeWithCurrentDate(shiftName); // Shift start time (current date + shift time)
+    console.log('your from data is this :',fromDate);
+    let now = new Date();
+
+    let day = now.getDate().toString().padStart(2, '0');
+    let month = (now.getMonth() + 1).toString().padStart(2, '0');
+    let year = now.getFullYear();
+    let hours = now.getHours() % 12 || 12;
+    let minutes = now.getMinutes().toString().padStart(2, '0');
+    let seconds = now.getSeconds().toString().padStart(2, '0');
+    let ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+
+    let endDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds} ${ampm}`;
+
+
+}
+
+
+
+
+
+
+function getCSRFToken(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        let cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+
+
+function checkShiftChange() {
+    let now = new Date();
+    let currentTime = now.toTimeString().split(' ')[0];
+    let currentShift = null;
+    let previousShift = null;
+
+    for (let i = 0; i < shiftValues.length; i++) {
+        let shift = shiftValues[i];
+        let shiftTime24Hour = convertTo24Hour(shift.shift_time);
+
+        if (currentTime >= shiftTime24Hour) {
+            previousShift = currentShift;
+            currentShift = shift.shift;
+        } else {
+            break;
+        }
+    }
+
+    // Check 5 seconds before next shift starts (existing logic)
+    let nextShiftTime = null;
+    for (let i = 0; i < shiftValues.length; i++) {
+        let shiftTime24Hour = convertTo24Hour(shiftValues[i].shift_time);
+        if (currentTime < shiftTime24Hour) {
+            nextShiftTime = shiftTime24Hour;
+            break;
+        }
+    }
+
+    if (nextShiftTime) {
+        let shiftDateTime = new Date();
+        let [hours, minutes, seconds] = nextShiftTime.split(':');
+        shiftDateTime.setHours(parseInt(hours));
+        shiftDateTime.setMinutes(parseInt(minutes));
+        shiftDateTime.setSeconds(parseInt(seconds) - 5);
+
+        let shiftMinusFiveSec = shiftDateTime.toTimeString().split(' ')[0];
+
+        if (currentTime === shiftMinusFiveSec && currentShift) {
+            checkAndRedirect(currentShift);
+        }
+    }
+
+    // NEW: Check if previous shift was missed and not redirected
+    if (previousShift) {
+        fetch(`/shift_redirect_status/?shift=${encodeURIComponent(previousShift)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (!data.redirected) {
+                    console.log('Missed previous shift redirect. Redirecting now...');
+                    let fromDate = combineShiftTimeWithCurrentDate(previousShift);
+                    let now = new Date();
+                    let endDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${now.getHours() % 12 || 12}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} ${now.getHours() >= 12 ? 'PM' : 'AM'}`;
+                    var partModel = $("#part_model").val();
+
+                    fetch('/save_shift_redirect/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCSRFToken('csrftoken')
+                        },
+                        body: JSON.stringify({ shift: previousShift })
+                    });
+
+                    setTimeout(() => {
+                        window.location.href = `/report/?from_date=${encodeURIComponent(fromDate)}&to_date=${encodeURIComponent(endDate)}&part_model=${encodeURIComponent(partModel)}`;
+                    }, 1000);
+                }
+            });
+    }
+}
+
+function checkAndRedirect(shiftName) {
+    fetch(`/shift_redirect_status/?shift=${encodeURIComponent(shiftName)}`)
+        .then(response => response.json())
+        .then(data => {
+            if (!data.redirected) {
+                console.log('Redirecting to report page...');
+
+                let fromDate = combineShiftTimeWithCurrentDate(shiftName);
+                let now = new Date();
+                let endDate = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')} ${now.getHours() % 12 || 12}:${String(now.getMinutes()).padStart(2, '0')}:${String(now.getSeconds()).padStart(2, '0')} ${now.getHours() >= 12 ? 'PM' : 'AM'}`;
+                var partModel = $("#part_model").val();
+
+                fetch('/save_shift_redirect/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCSRFToken('csrftoken')
+                    },
+                    body: JSON.stringify({ shift: shiftName })
+                });
+
+                setTimeout(() => {
+                    window.location.href = `/report/?from_date=${encodeURIComponent(fromDate)}&to_date=${encodeURIComponent(endDate)}&part_model=${encodeURIComponent(partModel)}`;
+                }, 1000);
+            }
+        });
+}
+
+
+
+// Function to display shift change notification
+function showShiftNotification() {
+    let notification = document.createElement('div');
+    notification.id = 'shift-notification';
+    notification.innerText = 'It\'s time to switch to the next shift!';
+    notification.style.position = 'fixed';
+    notification.style.top = '10px';
+    notification.style.right = '10px';
+    notification.style.backgroundColor = 'green';
+    notification.style.color = 'white';
+    notification.style.padding = '10px';
+    notification.style.borderRadius = '5px';
+    document.body.appendChild(notification);
+
+    // Remove the notification after 3 seconds and refresh the page
+    setTimeout(function() {
+        notification.style.display = 'none';
+        location.reload(); // Refresh the page
+    }, 3000);
+}
+
+// Call the function to initially display the clock
+updateClock();
+
+// Call setDateTimes every second to update the shift name
+setInterval(setDateTimes, 1000);
+
+setInterval(checkShiftChange, 500);
+        
+
+
+
+// Initialize WebSocket connection
+// Initialize WebSocket connection
+const socket = new WebSocket('ws://localhost:8000/ws/measurement/');
+
+// Variables to track data activity
+let isConnected = false; // Tracks connection status
+let lastMessageTime = Date.now(); // Tracks the time of the last received message
+let timeoutDuration = 5000; // Set timeout duration (e.g., 5000ms = 5 seconds)
+
+// Function to check connection status periodically
+function checkConnection() {
+    const currentTime = Date.now();
+    const elapsedTime = currentTime - lastMessageTime;
+
+    // Check if the elapsed time exceeds the timeout duration
+    if (elapsedTime > timeoutDuration) {
+        if (isConnected) {
+            displayDisconnected(); // Change status to disconnected
+            isConnected = false;  // Mark as disconnected
+        }
+    } else {
+        if (!isConnected) {
+            displayConnected(); // Change status to connected
+            isConnected = true;  // Mark as connected
+        }
+    }
+}
+
+// Function to display "Connected" message
+function displayConnected() {
+    const messageBox = document.getElementById("message");
+    messageBox.value = "Connected";
+    messageBox.style.color = "black";
+    messageBox.style.backgroundColor = "green";
+}
+
+// Function to display "Disconnected" message
+function displayDisconnected() {
+    const messageBox = document.getElementById("message");
+    messageBox.value = "Disconnected";
+    messageBox.style.color = "black";
+    messageBox.style.backgroundColor = "red";
+}
+
+// Function to start serial communication
+function startSerialCommunication() {
+    const messageBox = document.getElementById("message"); // Get the input box
+    if (socket.readyState === WebSocket.OPEN) {
+        const dbPort = document.getElementById("db_port").value;
+        const comPorts = document.getElementById("com_ports").value;
+        const baudRate = document.getElementById("baud_rate").value;
+        const parity = document.getElementById("parity").value;
+        const stopbit = document.getElementById("stopbit").value;
+        const databit = document.getElementById("databit").value;
+
+        console.log('COM port:', comPorts);
+        console.log('DB port:', dbPort);
+
+        if (dbPort === comPorts) {
+            const comparableValue = dbPort; // If equal, use dbPort
+            console.log("Matching Value:", comparableValue);
+
+            socket.send(JSON.stringify({
+                command: 'start_serial',
+                com_port: dbPort,
+                baud_rate: baudRate,
+                parity: parity,
+                stopbit: stopbit,
+                databit: databit,
+            }));
+
+            displayConnected(); // Initially set to connected
+            lastMessageTime = Date.now(); // Reset the timer
+        } else {
+            displayDisconnected(); // Set to disconnected if ports don't match
+        }
+    } else {
+        setTimeout(startSerialCommunication, 100); // Retry every 100ms if WebSocket isn't ready
+    }
+}
+
+// WebSocket event listeners
+socket.onopen = function(event) {
+    console.log("WebSocket connection established.");
+    startSerialCommunication();
+};
+
+// When data is received
+socket.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    const message = data.message;
+
+    // Update last message time
+    lastMessageTime = Date.now();
+
+    // Append data to textarea
+    const serialDataDisplay = document.getElementById("serial-data-display");
+    serialDataDisplay.value += message + '\n';
+    serialDataDisplay.scrollTop = serialDataDisplay.scrollHeight;
+
+    // Update status to connected
+    displayConnected();
+};
+
+// Handle errors
+socket.onerror = function(event) {
+    displayDisconnected();
+};
+
+// Handle close events
+socket.onclose = function(event) {
+    displayDisconnected();
+};
+
+// Periodically check connection status
+setInterval(checkConnection, 1000); // Check every 1 second
+
+// jQuery WebSocket handling for COM port
+$(document).ready(function () {
+    const ws = new WebSocket('ws://localhost:8000/ws/comport/');
+
+    ws.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        
+        if (data.message) {
+            lastMessageTime = Date.now(); // Reset timer when data is received
+
+            // Match "+" pattern
+            const plusChannels = data.message.match(/[A-K]\+[^\+A-K]*/g);
+            if (plusChannels) {
+                plusChannels.forEach(channel => {
+                    const channelId = channel.charAt(0);
+                    const channelData = channel.charAt(1) + channel.substr(2); 
+                    $(`#probe-${channelId}`).val(channelData);
+                });
+            }
+
+            // Match "-" pattern
+            const minusChannels = data.message.match(/[A-K]\-[^\-A-K]*/g);
+            if (minusChannels) {
+                minusChannels.forEach(channel => {
+                    const channelId = channel.charAt(0);
+                    const channelData = channel.charAt(1) + channel.substr(2); 
+                    $(`#probe-${channelId}`).val(channelData);
+                });
+            }
+        }
+    };
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const inputFields = [
+        "password_punch",
+        
+    ];
+
+    const switchInput = document.getElementById("toggle-switch");
+    let isPadEnabled = switchInput.checked;
+
+    const numberPad = document.createElement("div");
+    numberPad.id = "numberPad";
+    numberPad.className = "num-pad";
+    numberPad.style.display = "none";
+
+    let isAlphabetMode = false;
+    let alphabetKeys = {
+        "abc": ["a", "b", "C"],
+        "def": ["d", "e", "f"],
+        "ghi": ["g", "h", "i"],
+        "jkl": ["j", "k", "l"],
+        "mno": ["m", "n", "o"],
+        "pqrs": ["p", "q", "r", "s"],
+        "tuv": ["t", "u", "v"],
+        "wxyz": ["w", "x", "y", "z"]
+    };
+    let keyPressCount = {};
+    let lastKeyPressed = null;
+    let keyPressTimeout = null;
+    let activeInput = null;
+
+    const toggleButton = document.createElement("button");
+    toggleButton.textContent = "ALP";
+    toggleButton.className = "num-btn";
+    toggleButton.addEventListener("mousedown", function (e) {
+        e.preventDefault();
+        toggleMode();
+    });
+
+    let buttons = [];
+    createNumberPad();
+    document.body.appendChild(numberPad);
+
+    switchInput.addEventListener("change", function () {
+        isPadEnabled = this.checked;
+        if (!isPadEnabled) {
+            numberPad.style.display = "none";
+        }
+    });
+
+    // Apply to all input fields listed
+    inputFields.forEach((id) => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.addEventListener("focus", function () {
+                activateKeypad(this);
+            });
+        }
+    });
+
+    function activateKeypad(inputElement) {
+        if (!isPadEnabled) return;
+
+        activeInput = inputElement;
+        numberPad.style.display = "block";
+        positionNumberPad(activeInput, numberPad);
+
+        const isNumberOnly = inputElement.classList.contains("number-only");
+        numberPad.innerHTML = "";
+
+        if (isNumberOnly) {
+            isAlphabetMode = false;
+            createNumberPad();
+        } else {
+            numberPad.appendChild(toggleButton);
+            numberPad.appendChild(document.createElement("br"));
+            if (isAlphabetMode) {
+                createAlphabetPad();
+            } else {
+                createNumberPad();
+            }
+        }
+    }
+
+    function toggleMode() {
+        isAlphabetMode = !isAlphabetMode;
+        toggleButton.textContent = isAlphabetMode ? "NUM" : "ALP";
+        keyPressCount = {};
+        lastKeyPressed = null;
+        numberPad.innerHTML = "";
+        numberPad.appendChild(toggleButton);
+        numberPad.appendChild(document.createElement("br"));
+
+        if (isAlphabetMode) {
+            createAlphabetPad();
+        } else {
+            createNumberPad();
+        }
+    }
+
+    function createNumberPad() {
+        buttons = [];
+        for (let i = 1; i <= 9; i++) {
+            buttons.push(createButton(i));
+            if (i % 3 === 0) numberPad.appendChild(document.createElement("br"));
+        }
+        buttons.push(createButton("_"));
+        buttons.push(createButton(0));
+        buttons.push(createButton("."));
+        numberPad.appendChild(document.createElement("br"));
+        buttons.push(createButton("C", clearLastCharacter));
+        buttons.push(createButton("OK", hideNumberPad));
+    }
+
+    function createAlphabetPad() {
+        buttons = [];
+        for (let key in alphabetKeys) {
+            buttons.push(createButton(key, function () {
+                handleAlphabetClick(key);
+            }));
+            if (buttons.length % 3 === 0) numberPad.appendChild(document.createElement("br"));
+        }
+
+        const symbolKey = "@+-*/%";
+        buttons.push(createButton(symbolKey, function () {
+            handleSymbolClick(symbolKey);
+        }));
+
+        numberPad.appendChild(document.createElement("br"));
+        buttons.push(createButton("TAB", addSpace));
+        buttons.push(createButton("C", clearLastCharacter));
+        buttons.push(createButton("OK", hideNumberPad));
+    }
+
+    function createButton(value, callback) {
+        const button = document.createElement("button");
+        button.textContent = value;
+        button.className = "num-btn";
+        if (value === "@+-*/%") {
+            button.style.fontSize = "2vw";
+        }
+
+        button.addEventListener("mousedown", function (e) {
+            e.preventDefault(); // Prevent input blur
+            (callback || function () {
+                handleButtonClick(value);
+            })();
+        });
+
+        numberPad.appendChild(button);
+        return button;
+    }
+
+    function handleButtonClick(value) {
+        if (activeInput) {
+            activeInput.value += value;
+        }
+    }
+
+    function handleAlphabetClick(key) {
+        if (!alphabetKeys[key] || !activeInput) return;
+
+        if (lastKeyPressed !== key) {
+            activeInput.value += alphabetKeys[key][0];
+            keyPressCount[key] = 0;
+        } else {
+            keyPressCount[key] = (keyPressCount[key] + 1) % alphabetKeys[key].length;
+            activeInput.value = activeInput.value.slice(0, -1) + alphabetKeys[key][keyPressCount[key]];
+        }
+
+        lastKeyPressed = key;
+        clearTimeout(keyPressTimeout);
+        keyPressTimeout = setTimeout(() => {
+            lastKeyPressed = null;
+        }, 1000);
+    }
+
+    function handleSymbolClick(symbols) {
+        if (!activeInput) return;
+
+        if (lastKeyPressed !== symbols) {
+            activeInput.value += symbols[0];
+            keyPressCount[symbols] = 0;
+        } else {
+            keyPressCount[symbols] = (keyPressCount[symbols] + 1) % symbols.length;
+            activeInput.value = activeInput.value.slice(0, -1) + symbols[keyPressCount[symbols]];
+        }
+
+        lastKeyPressed = symbols;
+        clearTimeout(keyPressTimeout);
+        keyPressTimeout = setTimeout(() => {
+            lastKeyPressed = null;
+        }, 1000);
+    }
+
+    function addSpace() {
+        if (activeInput) {
+            activeInput.value += " ";
+        }
+    }
+
+    function clearLastCharacter() {
+        if (activeInput && activeInput.value.length > 0) {
+            activeInput.value = activeInput.value.slice(0, -1);
+        }
+    }
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" && numberPad.style.display === "block") {
+            hideNumberPad();
+        }
+    });
+
+    function hideNumberPad() {
+        numberPad.style.display = "none";
+    }
+
+    function positionNumberPad(input, pad) {
+        const rect = input.getBoundingClientRect();
+        const padWidth = pad.offsetWidth || 220;
+        const padHeight = pad.offsetHeight || 300;
+        const padding = 10;
+
+        let top = rect.bottom + window.scrollY + padding;
+        let left = rect.left + window.scrollX;
+
+        if (left + padWidth > window.innerWidth) {
+            left = rect.right - padWidth + window.scrollX;
+        }
+
+        if (top + padHeight > window.innerHeight + window.scrollY) {
+            top = rect.top + window.scrollY - padHeight - padding;
+        }
+
+        pad.style.position = "absolute";
+        pad.style.left = `${left}px`;
+        pad.style.top = `${top}px`;
+        pad.style.display = "block";
+    }
+});
+
+
+
+
+
+
+
+
+
+
+let overwriteButtons = [
+    document.getElementById("overwrite_cancel_button"),
+    document.getElementById("overwrite_ok_button")
+];
+let overwriteIndex = 0;
+
+function updateOverwriteFocus() {
+    overwriteButtons.forEach((btn, idx) => {
+        if (idx === overwriteIndex) {
+            btn.focus(); // set focus for accessibility
+            btn.style.outline = "3px solid yellow"; // visual cue
+        } else {
+            btn.style.outline = "none";
+        }
+    });
+}
+
+
+
+let mode = "ALPHA"; // or "ALPHA"
+let lastKey = null;
+let lastPressTime = 0;
+let cycleIndex = 0;
+const cycleTimeout = 1000;
+let capsLock = false;
+
+
+
+
+// Overwrite popup buttons
+let currentButtonIndex = 0;
+const buttonList = [
+  document.getElementById("overwrite_cancel_button"),
+  document.getElementById("overwrite_ok_button")
+];
+
+
+updateButtonFocus(buttonList, currentButtonIndex);
+
+
+// Credentials inputs + button
+let credentialFocusIndex = 0;
+const credentialElements = [
+//   document.getElementById("userid_punch"),
+  document.getElementById("password_punch"),
+  document.getElementById("punch_login")
+];
+
+updateCredentialFocus(credentialFocusIndex);  // Focus userid_punch
+
+
+
+function updateButtonFocus(buttons, index) {
+  buttons.forEach((btn, i) => {
+    if (i === index) {
+      btn.focus();
+      btn.style.outline = "3px solid yellow";
+    } else {
+      btn.style.outline = "none";
+    }
+  });
+}
+
+function updateCredentialFocus(index) {
+  credentialElements.forEach((el, i) => {
+    if (i === index) {
+      el.focus();
+      el.style.outline = "3px solid yellow";  // Apply to both input and button
+    } else {
+      el.style.outline = "none";  // Remove from both input and button
+    }
+  });
+}
+
+function backspaceInput() {
+    const focusedElement = credentialElements[credentialFocusIndex];
+    if (focusedElement && focusedElement.tagName === "INPUT") {
+        focusedElement.value = focusedElement.value.slice(0, -1);
+    }
+}
+
+
+
+
+
+
+const keyboardSocket = new WebSocket("ws://" + window.location.host + "/ws/keypad/");
+
+const alpha_map = {
+  "1": "1.,",
+  "2": "abc", "3": "def", "4": "ghi", "5": "jkl",
+  "6": "mno", "7": "pqrs", "8": "tuv", "9": "wxyz",
+  "0": "0+-*#"
+};
+
+let reportModeActive = false;
+let reportButtonList = [];
+let reportButtonIndex = 0;
+
+function updateReportButtonFocus() {
+  reportButtonList.forEach((btn, idx) => {
+    if (idx === reportButtonIndex) {
+      btn.focus();
+      btn.classList.add("focused-report-button");
+    } else {
+      btn.blur();
+      btn.classList.remove("focused-report-button");
+    }
+  });
+}
+
+keyboardSocket.onmessage = function(event) {
+  const data = JSON.parse(event.data);
+  const key = data.key;
+
+  const overwriteVisible = document.getElementById("punch_overwrite").style.display === "block";
+  const credentialsVisible = document.getElementById("punch_overwrite_credentials")?.style.display === "block";
+
+  if (overwriteVisible && !credentialsVisible) {
+    // Navigate popup buttons LFT/RGT
+    if (key === "LFT") {
+      currentButtonIndex = (currentButtonIndex - 1 + buttonList.length) % buttonList.length;
+      updateButtonFocus(buttonList, currentButtonIndex);
+    } else if (key === "RGT") {
+      currentButtonIndex = (currentButtonIndex + 1) % buttonList.length;
+      updateButtonFocus(buttonList, currentButtonIndex);
+    } else if (key === "ENT") {
+      buttonList[currentButtonIndex].click();
+    }
+    return;
+  }
+
+  if (credentialsVisible) {
+    const focusedElement = credentialElements[credentialFocusIndex];
+    const now = Date.now();
+
+    if (key === "UP") {
+      credentialFocusIndex = (credentialFocusIndex - 1 + credentialElements.length) % credentialElements.length;
+      updateCredentialFocus(credentialFocusIndex);
+    } else if (key === "DWN") {
+      credentialFocusIndex = (credentialFocusIndex + 1) % credentialElements.length;
+      updateCredentialFocus(credentialFocusIndex);
+    } else if (key === "ENT") {
+      if (focusedElement.tagName === "BUTTON") {
+        focusedElement.click();
+      } else {
+        focusedElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+      }
+    }
+    else if (key === "F10") {
+        backspaceInput();
+    }
+   else if (key === "ALP/NUM") {
+      mode = mode === "NUM" ? "ALPHA" : "NUM";
+      lastKey = null;
+      cycleIndex = 0;
+      console.log(`[MODE SWITCH] Mode changed to ${mode}`);
+    } else if (focusedElement.tagName === "INPUT") {
+        if (["LFT", "RGT", "UP", "DWN", "TAB", "START/STOP", "C1", "C2", "C3", "C4", "C5", "C6", "V Key", "F1", "F2", "F3", "F6", "F9", "F10", "F12"].includes(key)) {
+            return;
+        }
+        if (mode === "ALPHA" && alpha_map[key]) {
+            if (key === lastKey && (now - lastPressTime) < cycleTimeout) {
+                cycleIndex = (cycleIndex + 1) % alpha_map[key].length;
+                let charToReplace = alpha_map[key][cycleIndex];
+                if (capsLock) charToReplace = charToReplace.toUpperCase();
+                focusedElement.value = focusedElement.value.slice(0, -1) + charToReplace;
+            } else {
+                cycleIndex = 0;
+                let charToAdd = alpha_map[key][cycleIndex];
+                if (capsLock) charToAdd = charToAdd.toUpperCase();
+                focusedElement.value += charToAdd;
+            }
+            lastKey = key;
+            lastPressTime = Date.now();
+        } 
+    }
+    return;
+  }
+
+  // 🟨 Handle report mode navigation
+  if (reportModeActive) {
+    if (key === "LFT") {
+      reportButtonIndex = (reportButtonIndex - 1 + reportButtonList.length) % reportButtonList.length;
+      updateReportButtonFocus();
+      return;
+    } else if (key === "RGT") {
+      reportButtonIndex = (reportButtonIndex + 1) % reportButtonList.length;
+      updateReportButtonFocus();
+      return;
+    } else if (key === "ENT") {
+      reportButtonList[reportButtonIndex].click();
+      reportModeActive = false; // exit report mode after click
+      return;
+    }
+  }
+
+  // 🔵 Default function key handling
+  switch (key) {
+    case "F1":
+      document.getElementById("master_btn").click();
+      break;
+    case "F2":
+      document.getElementById("model_btn").click();
+      break;
+    case "F3":
+      document.getElementById("live_spc_btn").click();
+      break;
+    case "F12":
+      document.getElementById("menu_btn").click();
+      break;
+    case "F9":
+      document.getElementById("exit_btn").click();
+      break;
+    case "START/STOP":
+        if (isStart) {
+        startAction();
+        } else {
+        stopAction();
+        }
+        isStart = !isStart; // 🔁 Toggle start/stop state
+        break;
+    case "F6":
+      document.getElementById("report_btn_main").click();
+
+      // Setup for report button navigation
+      const spcBtn = document.getElementById("spc_btn");
+      const reportBtn = document.getElementById("report_btn");
+
+      if (spcBtn && reportBtn) {
+        reportButtonList = [spcBtn, reportBtn];
+        reportButtonIndex = 0;
+        reportModeActive = true;
+        updateReportButtonFocus();
+      }
+      break;
+    case "ENT":
+      const activeElement = document.activeElement;
+      if (activeElement && activeElement.tagName === 'INPUT') {
+        const enterEvent = new KeyboardEvent('keydown', {
+          key: 'Enter',
+          bubbles: true
+        });
+        activeElement.dispatchEvent(enterEvent);
+      }
+
+      if (isNotificationOpen) {
+    if (key === "ENT") {
+        document.getElementById("notificationOkBtn").click();
+    }
+    return; // block all other key actions while notification is shown
+}
+
+      break;
+    default:
+      console.log("Unhandled key:", key);
+  }
+};
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+    
+    
+</body>
+</html>

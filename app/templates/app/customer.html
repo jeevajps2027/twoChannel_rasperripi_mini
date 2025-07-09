@@ -1,0 +1,820 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'fontawesome-free-6.7.2-web/css/all.min.css' %}">
+    <script src="{% static 'jquery-jquery-f79d5f1/dist/jquery.min.js' %}"></script>
+
+  
+    <link rel="stylesheet" href="{% static 'css/customer_v1.css' %}">
+
+    <title>CUSTOMER DETAILS</title>  
+</head>
+<style>
+    #customer_name{
+width: 60%;
+height: 7vh;
+margin-left: 1%;
+margin-top: 1%;
+font-size: 2.8vw;
+font-weight: bold;
+text-align: center;
+}
+
+
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-box {
+  background-color: white;
+  padding: 20px 30px;
+  border-radius: 10px;
+  text-align: center;
+  box-shadow: 0 0 10px #000000aa;
+  max-width: 400px;
+}
+
+.modal-box button {
+  margin-top: 20px;
+  padding: 8px 20px;
+  font-size: 16px;
+}
+
+#notificationOkBtn:focus {
+    outline: 2px solid #007bff;
+    background-color: #e6f0ff;
+}
+
+#save-btn{
+  background-color: green;
+  height: 10vh;
+  width: 20vw;
+font-weight: bold;
+font-size: 2vw;
+color: black;
+border-radius: 10px;
+margin-top: 1%;
+margin-left: 2%;
+}
+
+#cancel-btn{
+    height: 10vh;
+    width: 20vw;
+background-color:red;
+font-weight: bold;
+font-size: 2vw;
+color: black;
+border-radius: 10px;
+margin-top: 1%;
+}
+
+
+#cancel-btn1{
+    height: 10vh;
+    width: 20vw;
+background-color:red;
+font-weight: bold;
+font-size: 2vw;
+color: black;
+border-radius: 10px;
+margin-top: 7%;
+}
+
+
+
+#save-btn-mail{
+  background-color: green;
+  height: 10vh;
+  width: 20vw;
+font-weight: bold;
+font-size: 2vw;
+color: black;
+border-radius: 10px;
+margin-top: 7%;
+}
+#close_btn {
+    position: absolute; /* Allows placement in the corner */
+    right: 2%; /* Adjust distance from the right edge */
+    background-color: #ff4c4c; /* Button background color */
+    border: none; /* Removes border */
+    border-radius: 5px; /* Rounded corners */
+    width: 8%; /* Button width */
+    height: 8%; /* Adjust the button height */
+    display: flex; /* Flex layout for the icon */
+    justify-content: center; /* Center the icon horizontally */
+    align-items: center; /* Center the icon vertically */
+    cursor: pointer; /* Changes cursor to pointer on hover */
+}
+
+#close_btn:hover {
+    background: linear-gradient(45deg,rgb(253, 36, 36),rgb(87, 1, 1));
+    transform: translateX(3px);
+}
+
+#close_btn:active {
+    background: linear-gradient(45deg,rgb(87, 1, 1),rgb(253, 36, 36));
+    transform: translateX(3px);
+}
+
+
+#close_icon {
+    font-size: 3vw; /* Icon size */
+    color: white; /* Icon color */
+}
+
+
+
+/* Wrap each label and input in a flex row */
+.form-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 3%;
+    width: 85%;
+    margin-left: 5%;
+    text-align: center;
+}
+
+/* Style the label */
+.form-row label {
+    
+    font-weight: bold;
+    font-size: 2vw;
+    color: #333;
+    width: 40%;
+    text-align: right;
+  
+}
+
+/* Style the input */
+.form-row input {
+    flex: 1;
+    padding: 1vh;
+    font-size: 2vw;
+    border: 2px solid black;
+    border-radius: 8px;
+    box-sizing: border-box;
+    background-color: #fff;
+    outline-color: #d06cd5;
+    transition: border-color 0.3s ease;
+    text-align: center;
+    width: 50%;
+    margin-left: 1%;
+}
+
+
+
+/* Switch wrapper */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 5vw;
+  height: 5vh;
+  
+}
+
+/* Hide default checkbox */
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+/* Slider */
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: 0.4s;
+  border-radius: 35%;
+  border: 2px solid black;
+}
+
+/* Circle inside slider */
+.slider::before {
+  position: absolute;
+  content: "";
+  height: 3.5vh;
+  width: 2vw;
+  left: 4px;
+  bottom: 4px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+/* When checkbox is checked */
+.switch input:checked + .slider {
+  background-color: #4caf50;
+}
+
+/* Move the circle */
+.switch input:checked + .slider::before {
+  transform: translateX(26px);
+}
+
+/* Optional: make it round */
+.slider.round {
+  border-radius: 34px;
+}
+
+.switch-container {
+  position: fixed; /* Or 'absolute' if inside a specific parent */
+  left: 2vw;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+}
+
+
+
+.num-pad {
+    position: absolute;
+    background: #ddd;
+    padding: 10px;
+    border-radius: 10px;
+    text-align: center;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    height: 45vh;
+    width: 25vw;
+}
+
+.num-btn {
+    width: 30%;
+    height: 15%;
+    font-size: 3vw;
+    margin: 5px;
+    cursor: pointer;
+    border: none;
+    background: white;
+    border-radius: 5px;
+    font-weight: bold;
+}
+
+.num-btn:hover {
+    background: lightgray;
+}
+
+
+</style>
+
+
+<body>
+    <div class="heading_container">
+        <div class="switch-container">
+            <i class="fas fa-keyboard" style="margin-right: 10px;font-size: 5vh;color: maroon;"></i>
+            <label class="switch">
+              <input type="checkbox" id="toggle-switch">
+              <span class="slider round"></span>
+            </label>
+          </div>
+        <center  id="center_head">
+           CUSTOMER DETAILS
+        </center>
+        <button type="button" id="close_btn">
+            <i class="fas fa-times" id="close_icon"></i>F12
+        </button>
+    </div>
+    <div class="main_container">
+       <div class="left_container">
+            <button id="customer_details" class="toggle-btn">CUSTOMER DETAILS</button>
+            <button id="mail_settings" class="toggle-btn">MAIL SETTINGS</button>
+       </div>
+       <div class="right_container">
+        <div class="item item-1" id="item1">
+        
+            <form id="customer-form" onsubmit="return validateForm()">
+            
+                <label for="customer_name" >CUSTOMER NAME:</label>
+                <input type="text" id="customer_name" name="customer_name" value="{{ customer.customer_name |default:''}}" required>
+                
+
+                <table id="prim_sec_table" style="margin-top: 10px;">
+                    <tr>
+                        <th></th>
+                        <th style="width: 20%;">CONTACT PERSON</th>
+                        <th style="width: 20%;">PH.NO</th>
+                        <th style="width: 20%;">EMAIL</th>
+                        <th style="width: 20%;">DEPT</th>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold;font-size: 2.2vw;">PRIMARY</td>
+                        <td><input type="text" class="no-outline" id="primary_contact_person" value="{{ customer.primary_contact_person|default:'' }}"></td>
+                        <td><input type="number" class="no-outline" id="primary_phone_no" value="{{ customer.primary_phone_no|default:'' }}"></td>
+                        <td><input type="text" class="no-outline" id="primary_email" value="{{ customer.primary_email|default:'' }}"></td>
+                        <td><input type="text" class="no-outline" id="primary_dept" value="{{ customer.primary_dept|default:'' }}"></td>
+                    </tr>
+                    <tr>
+                        <td style="font-weight: bold;font-size: 2.2vw;">SECONDARY</td>
+                        <td><input type="text" class="no-outline" id="secondary_contact_person" value="{{ customer.secondary_contact_person|default:'' }}"></td>
+                        <td><input type="number" class="no-outline" id="secondary_phone_no"  value="{{ customer.secondary_phone_no|default:'' }}"></td>
+                        <td><input type="text" class="no-outline" id="secondary_email"  value="{{ customer.secondary_email|default:'' }}"></td>
+                        <td><input type="text" class="no-outline" id="secondary_dept" value="{{ customer.secondary_dept|default:'' }}"></td>
+                    </tr>
+                </table>
+        
+                
+        
+                <div class="container">
+                    <div class="label-container">
+                        <label for="address" style="text-align: right;">ADDRESS:</label>
+                    </div>
+                    <textarea id="address" name="address" class="ruled-textarea" required>{{ customer.address|default:'' }}</textarea>
+                </div>
+                <a href="/comport/">
+                    <button type="button" id="cancel-btn"><b>BACK</b></button>
+                </a>
+                <button type="button" id="save-btn" onclick="saveData('customer')"><b>SAVE</b></button>
+            </form>
+        </div>
+
+
+
+        <div class="item item-2" id="item2">
+                <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="form-row">
+                    <label>SENDER EMAIL:</label>
+                    <input type="email" id="sender_email" value="{{ mail.sender_email|default:'' }}"  required>
+                </div>
+            
+                <div class="form-row">
+                    <label>PASSWORD:</label>
+                    <input type="password" id="sender_password" value="{{ mail.sender_password|default:'' }}" required>
+                </div>
+            
+                <div class="form-row">
+                    <label>SMTP SERVER:</label>
+                    <input type="text" id="smtp_server" value="{{ mail.smtp_server|default:'' }}"  required>
+                </div>
+            
+                <div class="form-row">
+                    <label>PORT:</label>
+                    <input type="number" id="smtp_port" value="{{ mail.smtp_port|default:'587' }}" required readonly>
+                </div>
+                
+                </form>
+            
+                <a href="{% url 'comport' %}">
+                    <button type="button" id="cancel-btn1"><b>BACK</b></button>
+                </a>
+                <button type="button" id="save-btn-mail" onclick="saveData('mail')"><b>SAVE</b></button>
+            
+            
+        </div>
+
+    </div>
+</div>
+
+
+            <!-- Custom Notification Modal -->
+            <div id="notificationModal" style="display: none;" class="modal-overlay">
+                <div class="modal-box">
+                  <p id="notificationMessage">This is a custom notification.</p>
+                  <button id="notificationOkBtn">OK</button>
+                </div>
+              </div>
+
+
+
+
+<script>
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const inputs = document.querySelectorAll("input");
+    inputs.forEach(input => input.setAttribute("autocomplete", "off"));
+});
+
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const inputFields = [
+        "customer_name",
+        "primary_contact_person",
+        "primary_phone_no",
+        "primary_email",
+        "primary_dept",
+        "secondary_contact_person",
+        "secondary_phone_no",
+        "secondary_email",
+        "secondary_dept",
+        "address",
+        "sender_email",
+        "sender_password",
+        "smtp_server",
+        "smtp_port"
+    ];
+
+    const switchInput = document.getElementById("toggle-switch");
+    let isPadEnabled = switchInput.checked;
+
+    const numberPad = document.createElement("div");
+    numberPad.id = "numberPad";
+    numberPad.className = "num-pad";
+    numberPad.style.display = "none";
+
+    let isAlphabetMode = false;
+    let alphabetKeys = {
+        "abc": ["A", "B", "C"],
+        "def": ["D", "E", "F"],
+        "ghi": ["G", "H", "I"],
+        "jkl": ["J", "K", "L"],
+        "mno": ["M", "N", "O"],
+        "pqrs": ["P", "Q", "R", "S"],
+        "tuv": ["T", "U", "V"],
+        "wxyz": ["W", "X", "Y", "Z"]
+    };
+    let keyPressCount = {};
+    let lastKeyPressed = null;
+    let keyPressTimeout = null;
+    let activeInput = null;
+
+    const toggleButton = document.createElement("button");
+    toggleButton.textContent = "ALP";
+    toggleButton.className = "num-btn";
+    toggleButton.addEventListener("mousedown", function (e) {
+        e.preventDefault();
+        toggleMode();
+    });
+
+    let buttons = [];
+    createNumberPad();
+    document.body.appendChild(numberPad);
+
+    switchInput.addEventListener("change", function () {
+        isPadEnabled = this.checked;
+        if (!isPadEnabled) {
+            numberPad.style.display = "none";
+        }
+    });
+
+    // Apply to all input fields listed
+    inputFields.forEach((id) => {
+        const field = document.getElementById(id);
+        if (field) {
+            field.addEventListener("focus", function () {
+                activateKeypad(this);
+            });
+        }
+    });
+
+    function activateKeypad(inputElement) {
+        if (!isPadEnabled) return;
+
+        activeInput = inputElement;
+        numberPad.style.display = "block";
+        positionNumberPad(activeInput, numberPad);
+
+        const isNumberOnly = inputElement.classList.contains("number-only");
+        numberPad.innerHTML = "";
+
+        if (isNumberOnly) {
+            isAlphabetMode = false;
+            createNumberPad();
+        } else {
+            numberPad.appendChild(toggleButton);
+            numberPad.appendChild(document.createElement("br"));
+            if (isAlphabetMode) {
+                createAlphabetPad();
+            } else {
+                createNumberPad();
+            }
+        }
+    }
+
+    function toggleMode() {
+        isAlphabetMode = !isAlphabetMode;
+        toggleButton.textContent = isAlphabetMode ? "NUM" : "ALP";
+        keyPressCount = {};
+        lastKeyPressed = null;
+        numberPad.innerHTML = "";
+        numberPad.appendChild(toggleButton);
+        numberPad.appendChild(document.createElement("br"));
+
+        if (isAlphabetMode) {
+            createAlphabetPad();
+        } else {
+            createNumberPad();
+        }
+    }
+
+    function createNumberPad() {
+        buttons = [];
+        for (let i = 1; i <= 9; i++) {
+            buttons.push(createButton(i));
+            if (i % 3 === 0) numberPad.appendChild(document.createElement("br"));
+        }
+        buttons.push(createButton("_"));
+        buttons.push(createButton(0));
+        buttons.push(createButton("."));
+        numberPad.appendChild(document.createElement("br"));
+        buttons.push(createButton("C", clearLastCharacter));
+        buttons.push(createButton("OK", hideNumberPad));
+    }
+
+    function createAlphabetPad() {
+        buttons = [];
+        for (let key in alphabetKeys) {
+            buttons.push(createButton(key, function () {
+                handleAlphabetClick(key);
+            }));
+            if (buttons.length % 3 === 0) numberPad.appendChild(document.createElement("br"));
+        }
+
+        const symbolKey = "@+-*/%";
+        buttons.push(createButton(symbolKey, function () {
+            handleSymbolClick(symbolKey);
+        }));
+
+        numberPad.appendChild(document.createElement("br"));
+        buttons.push(createButton("TAB", addSpace));
+        buttons.push(createButton("C", clearLastCharacter));
+        buttons.push(createButton("OK", hideNumberPad));
+    }
+
+    function createButton(value, callback) {
+        const button = document.createElement("button");
+        button.textContent = value;
+        button.className = "num-btn";
+        if (value === "@+-*/%") {
+            button.style.fontSize = "2vw";
+        }
+
+        button.addEventListener("mousedown", function (e) {
+            e.preventDefault(); // Prevent input blur
+            (callback || function () {
+                handleButtonClick(value);
+            })();
+        });
+
+        numberPad.appendChild(button);
+        return button;
+    }
+
+    function handleButtonClick(value) {
+        if (activeInput) {
+            activeInput.value += value;
+        }
+    }
+
+    function handleAlphabetClick(key) {
+        if (!alphabetKeys[key] || !activeInput) return;
+
+        if (lastKeyPressed !== key) {
+            activeInput.value += alphabetKeys[key][0];
+            keyPressCount[key] = 0;
+        } else {
+            keyPressCount[key] = (keyPressCount[key] + 1) % alphabetKeys[key].length;
+            activeInput.value = activeInput.value.slice(0, -1) + alphabetKeys[key][keyPressCount[key]];
+        }
+
+        lastKeyPressed = key;
+        clearTimeout(keyPressTimeout);
+        keyPressTimeout = setTimeout(() => {
+            lastKeyPressed = null;
+        }, 1000);
+    }
+
+    function handleSymbolClick(symbols) {
+        if (!activeInput) return;
+
+        if (lastKeyPressed !== symbols) {
+            activeInput.value += symbols[0];
+            keyPressCount[symbols] = 0;
+        } else {
+            keyPressCount[symbols] = (keyPressCount[symbols] + 1) % symbols.length;
+            activeInput.value = activeInput.value.slice(0, -1) + symbols[keyPressCount[symbols]];
+        }
+
+        lastKeyPressed = symbols;
+        clearTimeout(keyPressTimeout);
+        keyPressTimeout = setTimeout(() => {
+            lastKeyPressed = null;
+        }, 1000);
+    }
+
+    function addSpace() {
+        if (activeInput) {
+            activeInput.value += " ";
+        }
+    }
+
+    function clearLastCharacter() {
+        if (activeInput && activeInput.value.length > 0) {
+            activeInput.value = activeInput.value.slice(0, -1);
+        }
+    }
+
+    document.addEventListener("keydown", function (event) {
+        if (event.key === "Enter" && numberPad.style.display === "block") {
+            hideNumberPad();
+        }
+    });
+
+    function hideNumberPad() {
+        numberPad.style.display = "none";
+    }
+
+    function positionNumberPad(input, pad) {
+        const rect = input.getBoundingClientRect();
+        const padWidth = pad.offsetWidth || 220;
+        const padHeight = pad.offsetHeight || 300;
+        const padding = 10;
+
+        let top = rect.bottom + window.scrollY + padding;
+        let left = rect.left + window.scrollX;
+
+        if (left + padWidth > window.innerWidth) {
+            left = rect.right - padWidth + window.scrollX;
+        }
+
+        if (top + padHeight > window.innerHeight + window.scrollY) {
+            top = rect.top + window.scrollY - padHeight - padding;
+        }
+
+        pad.style.position = "absolute";
+        pad.style.left = `${left}px`;
+        pad.style.top = `${top}px`;
+        pad.style.display = "block";
+    }
+});
+
+
+
+
+
+
+
+document.getElementById("close_btn").addEventListener("click", function() {
+        // Redirect to the measurement URL
+        window.location.href = "{% url 'comport' %}";
+    });
+
+    document.addEventListener("keydown", function (event) {
+    // Check if F4 is pressed
+    if (event.key === "F12") {
+        event.preventDefault(); // Prevent default F4 behavior (optional)
+        
+        // Redirect to the Measurement page
+        window.location.href = "/comport";  // Replace with your actual path
+    }
+});
+    
+
+
+let isNotificationOpen = false;
+
+function showNotification(message) {
+    isNotificationOpen = true;
+    document.getElementById("notificationMessage").textContent = message;
+    document.getElementById("notificationModal").style.display = "flex";
+    document.getElementById("notificationOkBtn").focus();
+
+    document.getElementById("notificationOkBtn").onclick = () => {
+        document.getElementById("notificationModal").style.display = "none";
+        isNotificationOpen = false;
+
+       
+    };
+}
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        const customerBtn = document.getElementById("customer_details");
+        const mailBtn = document.getElementById("mail_settings");
+    
+        const item1 = document.getElementById("item1");
+        const item2 = document.getElementById("item2");
+    
+        customerBtn.addEventListener("click", function () {
+            item1.style.display = "block";
+            item2.style.display = "none";
+    
+            customerBtn.classList.add("active");
+            mailBtn.classList.remove("active");
+        });
+    
+        mailBtn.addEventListener("click", function () {
+            item1.style.display = "none";
+            item2.style.display = "block";
+    
+            mailBtn.classList.add("active");
+            customerBtn.classList.remove("active");
+        });
+    
+        // Optional: Default state
+        customerBtn.classList.add("active");
+        item1.style.display = "block";
+        item2.style.display = "none";
+    });
+
+
+
+
+
+function saveData(formType) {
+    let formData = {};
+
+    if (formType === 'customer') {
+        // Collect customer form data
+        formData.customer_name = document.getElementById('customer_name').value;
+        formData.primary_contact_person = document.getElementById('primary_contact_person').value;
+        formData.secondary_contact_person = document.getElementById('secondary_contact_person').value;
+        formData.primary_email = document.getElementById('primary_email').value;
+        formData.secondary_email = document.getElementById('secondary_email').value;
+        formData.primary_phone_no = document.getElementById('primary_phone_no').value;
+        formData.secondary_phone_no = document.getElementById('secondary_phone_no').value;
+        formData.primary_dept = document.getElementById('primary_dept').value;
+        formData.secondary_dept = document.getElementById('secondary_dept').value;
+        formData.address = document.getElementById('address').value;
+
+    }  else if (formType === 'mail') {
+        formData.sender_email = document.getElementById('sender_email').value;
+        formData.sender_password = document.getElementById('sender_password').value;
+        formData.smtp_server = document.getElementById('smtp_server').value;
+        formData.smtp_port = document.getElementById('smtp_port').value;
+    }
+
+    // Log the form data and type for debugging
+    console.log("formData", formData);
+    console.log("formType", formType);
+
+    // // Send formData to the server
+    sendDataToServer(formData, formType);
+}
+const csrftoken = getCookie('csrftoken');
+// Function to send data to the server
+function sendDataToServer(formData, formType) {
+    fetch('/customer/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': csrftoken // Use Django's CSRF token if needed
+        },
+        body: JSON.stringify({
+            formType: formType,
+            formData: formData
+        })
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Success:', data);
+        showNotification('Data saved successfully', true); // Show success notification
+        // Handle any additional success logic if needed
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        showNotification('Error saving data: ' + error.message, false); // Show error notification
+    });
+}
+
+
+
+// Function to get the CSRF token
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+
+
+
+
+
+    </script>
+    
+        
+</body>
+</html>

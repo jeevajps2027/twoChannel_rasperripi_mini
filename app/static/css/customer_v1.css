@@ -1,0 +1,221 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    box-sizing: border-box; /* Includes border in the width and height calculations */
+    overflow: hidden; /* Prevents scrolling caused by overflow */
+}
+
+body {
+    font-family: Arial, sans-serif;
+    border: 5px solid lightseagreen ;
+} 
+
+
+
+.heading_container{
+    height: 10%;
+width: 100%;
+border: 1px solid black;
+display: flex; /* Enables flexbox */
+justify-content: center; /* Centers container-2-1 horizontally */
+align-items: center; /* Centers container-2-1 vertically */
+background-color: black;
+}
+
+#center_head{
+color: white;
+
+ font-size: 6vh;
+ font-weight: bold;
+ 
+font-style: italic;
+}
+
+.main_container{
+    height: 90%;
+width: 100%;
+border: 1px solid black;
+display: flex; /* Enables flexbox */
+justify-content: center; /* Centers container-2-1 horizontally */
+align-items: center; /* Centers container-2-1 vertically */
+background-color: rgb(217, 242, 250);
+}
+
+
+.left_container {
+width: 25%; 
+height: 100%; 
+border: 2px solid black; 
+display: flex;
+flex-direction: column;
+gap: 10px; 
+background-color: gray;
+
+}
+.right_container {
+width: 75%; /* Ensures two equal halves with a small gap */
+height: 100%; /* Matches the height of the parent container */
+border: 1px solid gray; /* Optional: Adds border to distinguish columns */
+display: flex;
+justify-content: center; /* Centers content horizontally in each column */
+align-items: center; /* Centers content vertically in each column */
+background-color: lightgray;
+
+}
+.toggle-btn {
+padding: 10px 20px;
+cursor: pointer;
+border: 1px solid black;
+background-color:black;
+border-radius: 5px;
+transition: background-color 0.3s;
+height: 15%;
+width: 80%;
+font-weight: bold;
+font-size: 2vw;
+color: white;
+margin-left: 7%;
+margin-top: 10%;
+}
+
+.toggle-btn:hover {
+background: linear-gradient(45deg,rgb(247, 120, 247),rgb(56, 1, 56));
+transform: translateX(3px)
+}
+
+.toggle-btn.active {
+background: linear-gradient(45deg,rgb(56, 1, 56), rgb(247, 120, 247));
+transform: translateX(3px)
+}
+
+
+table {
+border-collapse: collapse;
+width: 100%;
+}
+
+th, td {
+border: 1px solid black;
+padding: 8px;
+text-align: center;
+height: 8vh;
+vertical-align: middle;
+
+}
+
+th{
+    font-size: 1.8vw;
+    font-weight: bold;
+}
+
+
+.no-outline {
+width: 100%;
+height: 100%;
+border: none;
+outline: none;
+padding: 0;
+margin: 0;
+box-sizing: border-box;
+text-align: center;
+font-size: 1.8vw;
+font-weight: bold;
+overflow-y: auto;
+}
+
+
+
+label {
+display: inline-block;
+
+margin-top: 1%;
+text-align: center;
+font-weight: bold;
+font-size: 1.8vw;
+
+}
+
+
+
+
+
+
+.container {
+        display: flex;
+        align-items: center; /* Center elements vertically */
+        justify-content: center; /* Center elements horizontally */
+        margin-top: 20px; /* Adjust as needed */
+        background-color: gray;
+        padding: 20px; /* Add padding if needed */
+    }
+
+    .label-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* Center label vertically within the container */
+        margin-right: 20px; /* Adjust space between label and textarea */
+    }
+    .ruled-textarea {
+        width: 40vw;
+        height: 20vh;
+        font-size: 5vh;              /* Set font size in vh */
+        line-height: 5vh;            /* Each line = 3vh tall */
+        background: repeating-linear-gradient(
+            white,
+            white 2.9vh,             /* Line color just before end */
+            white 3vh                /* Black line at every 3vh */
+        );
+        border: 0.2vw solid #ccc;
+        padding: 0.5vh 1vw;          /* Top/bottom in vh, sides in vw */
+        box-sizing: border-box;
+        font-family: Arial, sans-serif;
+        resize: none;
+        margin-left: 2vw;
+        font-weight: bold;
+    }
+    
+
+    .ruled-textarea:focus {
+        border-color: #904caf; /* Add focus style */
+        box-shadow: 0 0 5px #904caf;
+        outline: none;
+    }
+    
+
+
+
+.item-1, .item-2{
+    border: 1px solid #ccc;
+    padding: 20px;
+    text-align: center;
+    transition: transform 0.3s; 
+  }
+
+  #item2{
+    height: 85%;
+    width: 85%;
+    background-color: lightgrey;
+  }
+
+  /* Container styling */
+.item-2 {
+    padding: 2vh 3vw;
+    background-color: #f9f9ff;
+    border-radius: 15px;
+    box-shadow: 0 0 15px rgba(147, 112, 219, 0.3);
+    font-family: Arial, sans-serif;
+    width: 60vw;
+    margin: auto;
+}
+
+
+
+
+.item-2 form input:focus {
+    border-color: #a34fc1;
+}
+
+
+
