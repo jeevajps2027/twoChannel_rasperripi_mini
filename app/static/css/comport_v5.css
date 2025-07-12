@@ -106,17 +106,6 @@ body {
 
 
 
-.container-1-2 button:hover {
-    background: linear-gradient(45deg, rgb(3, 41, 255), rgb(0, 3, 14));
-    transform: translateY(3px); /* Moves the button slightly downward */
-}
-
-.container-1-2 button:active {
-    background: linear-gradient(45deg, rgb(0, 3, 14), rgb(3, 41, 255));
-    transform: translateY(5px); /* Moves the button slightly downward */
-}
-
-
 
 .container-2 {
     height: 80%;
@@ -505,12 +494,17 @@ body {
     font-size: 2.5vw;
 }
 
-#cancel-btn_shift,#save_btn_shift{
+#cancel-btn_shift,#save_btn_shift,#delete_btn_shift{
     height: 100%;
     width:20%;
     font-weight: bold;
     font-size: 2vw;
 }
+
+#delete_btn_shift{
+background-color: orange;
+}
+
 #cancel-btn_shift:hover{
     background: linear-gradient(145deg, #f70303, #f85c5c); /* Soft 3D gradient */
     transform: scale(1.05);

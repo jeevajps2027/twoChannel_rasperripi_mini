@@ -813,7 +813,7 @@ $('#search_btn').click(function (event) {
         showNotifications(xhr.responseJSON.error);  // Show specific message from server
     } else {
         console.error('Error:', error);
-        showNotifications('An unexpected error occurred. Please try again.');
+        showNotifications('An error occurred. Please try again.');
     }
         }
     });

@@ -8,7 +8,7 @@
     <script src="{% static 'jquery-jquery-f79d5f1/dist/jquery.min.js' %}"></script>
 
   
-    <link rel="stylesheet" href="{% static 'css/comport_v4.css' %}">
+    <link rel="stylesheet" href="{% static 'css/comport_v5.css' %}">
 
     <title>SETTINGS</title>  
 </head>
@@ -25,6 +25,10 @@
     border-radius: 5px; /* Rounded corners */
     cursor: pointer; /* Pointer cursor on hover */
 }
+.container-1-2 button.active {
+    background-color: red;
+}
+
 
 .toggle-btn.active {
     background: linear-gradient(45deg, rgb(56, 1, 56), rgb(247, 120, 247));
@@ -232,6 +236,11 @@
     font-size: 2vw;
 }
 
+.container-1-2 button.active-btn {
+    background-color: orangered !important;
+}
+
+
 </style>
 <body>
 <div class="container-1">
@@ -259,12 +268,24 @@
         </button>
     </div>
     <div class="container-1-2">
-        <button onclick="showSubContainer(1)">COMPORT SETTINGS</button>
+        <button class="active-btn" onclick="showSubContainer(1)">COMPORT SETTINGS</button>
         <button onclick="showSubContainer(2)">SETTINGS</button>
         <button onclick="showSubContainer(3)" class="blurred-button">CNC SETTINGS</button>
         <button id="customer_details" >CUSTOMER DETAILS</button>
         <button id="parameter-settings">PARAMETER SETTINGS</button>
         <script>
+
+document.querySelectorAll('.container-1-2 button').forEach(button => {
+        button.addEventListener('click', function () {
+            // Remove active from all buttons if you want only one active
+            document.querySelectorAll('.container-1-2 button').forEach(btn => btn.classList.remove('active-btn'));
+
+            // Add active to the clicked one
+            this.classList.add('active-btn');
+        });
+    });
+
+
             // Select the button by its ID
 document.getElementById("parameter-settings").addEventListener("click", function() {
     // Redirect to the 'parameter' URL
@@ -288,7 +309,7 @@ function showNotifications(message) {
     document.getElementById("notificationOkBtn").onclick = () => {
         document.getElementById("notificationModal").style.display = "none";
         isNotificationOpen = false;
-        location.reload();
+        
        
     };
 }
@@ -449,7 +470,8 @@ function showNotifications(message) {
                         
                     <div class="button_container2">
                     <button type="button" id="cancel-btn_shift"><b>CANCEL</b></button>
-                    <button type="button" id="save_btn_shift"><b>SAVE</b></button>  
+                    <button type="button" id="save_btn_shift"><b>SAVE</b></button> 
+                    <button type="button" id="delete_btn_shift"><b>DELETE</b></button> 
                     </div>
                     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
                 <script>
@@ -660,9 +682,17 @@ document.getElementById("close_btn").addEventListener("click", function() {
                 if (response.status === 'success') {
                     showNotifications('Shift settings saved successfully!');
                   
+                    if (response.status === 'success') {
+    showNotifications('Shift settings saved successfully!');
+    localStorage.setItem("activeTab", "settings");
+    localStorage.setItem("activeButton", "shift_settings");
 
-                    localStorage.setItem("activeTab", "settings");  // save tab state
-                window.location.reload();
+    setTimeout(() => {
+        location.reload();
+    }, 1500);
+}
+
+                
                 } else {
                     showNotifications('Error: ' + response.message);
                 }
@@ -674,6 +704,43 @@ document.getElementById("close_btn").addEventListener("click", function() {
         });
     });
 });
+
+
+
+
+document.getElementById("delete_btn_shift").addEventListener("click", function () {
+    const shiftValue = document.getElementById("shift").value.trim();
+
+    if (!shiftValue) {
+        showNotifications("Shift value is required.");
+        return;
+    }
+
+    fetch("/comport/", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),  // Make sure your CSRF setup is working
+        },
+        body: JSON.stringify({
+            request_type: "delete_shift",
+            shift: shiftValue
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            document.getElementById("shift").value = "";  // Clear the input field
+            showNotifications("Shift deleted successfully!");
+        } else {
+            showNotifications(data.message || "Failed to delete shift.");
+        }
+    })
+    .catch(error => {
+        showNotifications("Error deleting shift: " + error);
+    });
+});
+
 
         </script>                
             
@@ -773,7 +840,7 @@ body: JSON.stringify(data) // Convert data to JSON string
 .then(result => {
 if (result.status === 'success') {
     showNotifications('Backup settings saved successfully!');
-    location.reload(); // Reload the page
+   
 } else {
     showNotifications('Failed to save backup settings. Please try again.');
 }
@@ -1784,7 +1851,10 @@ function saveData() {
                 console.log("Data saved successfully:", response);
                 showNotifications("Data saved successfully!");
                 localStorage.setItem("activeTab", "settings");  // save tab state
-                window.location.reload();
+                setTimeout(() => {
+                    location.reload();
+                }, 1000); // time in milliseconds
+               
             } else {
                 console.error("Backend returned an error:", response.message);
                 showNotifications("Error: " + response.message);
@@ -1802,10 +1872,22 @@ document.addEventListener("DOMContentLoaded", function () {
     const activeTab = localStorage.getItem("activeTab");
 
     if (activeTab === "settings") {
-        showSubContainer(2);  // trigger the function manually
-        localStorage.removeItem("activeTab");  // clear it for next time
+        showSubContainer(2);  // Show the settings content
+
+        // Activate the SETTINGS button
+        const settingsButton = document.querySelector('button[onclick="showSubContainer(2)"]');
+        if (settingsButton) {
+            // Remove active from all buttons first
+            document.querySelectorAll('.container-1-2 button').forEach(btn => btn.classList.remove('active-btn'));
+
+            // Add active class to SETTINGS button
+            settingsButton.classList.add('active-btn');
+        }
+
+        // Clear the flag
+        localStorage.removeItem("activeTab");
     }
-});
+})
 
     function getCSRFToken() {
         const cookies = document.cookie.split("; ");

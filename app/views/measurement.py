@@ -189,6 +189,33 @@ def measurement(request):
             for param_name, values in last_measurement_dict.items()
         ]
 
+        if part_model_get:
+            
+            # Filter Master_settings for the specific part_model
+            latest_entry = master_data.objects.filter(part_model=part_model_get).order_by('-date_time').first()
+            
+            if latest_entry:
+                # Extract and format the latest date_time
+                last_stored_dates = latest_entry.date_time.strftime("%m-%d-%Y %I:%M:%S %p")
+                print("Latest date_time jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj:", last_stored_dates)
+            else:
+                print("No entries found for the given part_model jjjjjjjjjjjjjjjjjjjjjjjjj.")
+
+
+        master_interval_settings = MasterInterval.objects.all()
+        print("master_interval_settings:",master_interval_settings)
+
+        for setting in master_interval_settings:
+           
+            print("Hour:", setting.hour)
+            print("Minute:", setting.minute)
+           
+        # Convert the queryset to a list of dictionaries
+        interval_settings_list = list(master_interval_settings.values())
+
+        # Serialize the list to JSON
+        interval_settings_json = json.dumps(interval_settings_list)
+
 
 
         # Sending data in JSON format
@@ -215,6 +242,8 @@ def measurement(request):
             'parameter_factor_values':list(parameter_factor_values),
              'missing_probes': missing_probe_nos,
              "measurement_data": measurement_values,
+             "interval_settings_json":interval_settings_json,
+             "last_stored_dates":last_stored_dates,
         })
     
     elif request.method == 'GET':
@@ -247,27 +276,7 @@ def measurement(request):
         print('Your part names from database:', part_model)
 
 
-        try:
-            part_model_name = part_retrived.objects.values_list('part_name', flat=True).distinct().get()
-            print("part_model:", part_model)
-        except part_retrived.DoesNotExist:
-            part_model_name = None
-            print("No part model found.")
-        except part_retrived.MultipleObjectsReturned:
-            print("Multiple part models found.")
-
-        if part_model_name:
-            
-            # Filter Master_settings for the specific part_model
-            latest_entry = master_data.objects.filter(part_model=part_model_name).order_by('-date_time').first()
-            
-            if latest_entry:
-                # Extract and format the latest date_time
-                last_stored_dates = latest_entry.date_time.strftime("%m-%d-%Y %I:%M:%S %p")
-                print("Latest date_time jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj:", last_stored_dates)
-            else:
-                print("No entries found for the given part_model jjjjjjjjjjjjjjjjjjjjjjjjj.")
-
+      
 
         user_name = list(User_Data.objects.all().values())
         print('your username is this from databse:',user_name)
@@ -280,15 +289,15 @@ def measurement(request):
 
         if new_part:  # Check if data exists
             part_name = new_part['part_name']  # Extract part_name
-            print('Part name:', part_name)  # Print only part_name
+            print('Part name iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii:', part_name)  # Print only part_name
 
-            # Check if part_name exists in part_model and move it to the first position
-            if part_name in part_model:
-                part_model.remove(part_name)  # Remove the part_name from its current position
-                part_model.insert(0, part_name)  # Insert the part_name at index 0
-                print('Updated part_model with part_name at first index:', part_model)
-            else:
-                print('Part name not found in part_model. No update made.')
+            # # Check if part_name exists in part_model and move it to the first position
+            # if part_name in part_model:
+            #     part_model.remove(part_name)  # Remove the part_name from its current position
+            #     part_model.insert(0, part_name)  # Insert the part_name at index 0
+            #     print('Updated part_model with part_name at first index:', part_model)
+            # else:
+            #     print('Part name not found in part_model. No update made.')
         else:
             print('No data found!')  # Handle empty database
 
@@ -324,7 +333,8 @@ def measurement(request):
         
 
         context = {
-            'part_model': part_model,
+            'part_name': part_name,
+            'part_model':part_model,
             'comport_com_port': comport_com_port,
             'ports_string': ports_string,
             'comport_baud_rate': comport_baud_rate,
@@ -334,8 +344,7 @@ def measurement(request):
             'shift_time': json.dumps(shift_time),  # Pass serialized JSON data
             'user_name': json.dumps(user_name),
             'username':username,
-            'last_stored_dates':last_stored_dates,
-            'interval_settings_json':interval_settings_json,
+           
         }
 
         return render(request, 'app/measurement.html', context)

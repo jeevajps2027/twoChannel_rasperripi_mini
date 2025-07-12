@@ -802,9 +802,30 @@ function fetchAndDisplayValues(selectedMasterGroup) {
 
             const availableContainers = probeNumbers.length;
 
+            const masterGroupsValues = [...new Set(fetchedData.master_grp)];
 
-            for (let index = 1; index <= 8; index++) {
+
+const masteringSelect = document.getElementById("mastering");
+
+// Clear old options
+masteringSelect.innerHTML = '';
+
+// Add new options dynamically from fetchedData
+masterGroupsValues.forEach(value => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = value;
+    masteringSelect.appendChild(option);
+});
+
+            
+
+            
+
+            let foundMatch = false; // 🔍 Tracks if any match was found
+            for (let index = 1; index <= 2; index++) {
                 const container = document.getElementById(`cal_container${index}`);
+                console.log("container jjjjjjjjjjjjjjjjjj",container)
 
                 if (container) {
                     if (index <= availableContainers) {
@@ -815,11 +836,20 @@ function fetchAndDisplayValues(selectedMasterGroup) {
 
                         const isSelectedGroup = masterGroups[index - 1] === selectedMasterGroup;
                         container.style.backgroundColor = isSelectedGroup ? "orange" : "";
+                        // 🔔 Show alert if the group does not match
+                        if (isSelectedGroup) {
+                foundMatch = true; // ✅ At least one matched
+                console.log("match found jhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh")
+            }
+
                     } else {
                         container.style.filter = "blur(4px)";
                         container.style.backgroundColor = "";
                     }
+                    // ❗ After the loop — if no match found, show alert
+
                 }
+
 
                 // === Set input values and calculations ===
                 if (index <= availableContainers) {
@@ -984,6 +1014,8 @@ document.getElementById("lowMasterBtn").addEventListener("click", function () {
     }
         // Perform calculations for all parameters
         lowmaster.forEach((lowValue, index) => {
+
+            console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjindex",index)
             if (step_no[index] == selectedMasteringValue) {
                 const a = parseFloat(lowValue) || 0;
 
@@ -1032,7 +1064,7 @@ if (outputInput) {
             .find(radio => radio.checked);
 
         if (!selectedContainer) {
-            showCustomAlert("Please select a container radio button before proceeding.");
+            showCustomAlert("PLEASE SELECT THE CHANNEL NO!.");
 
             setTimeout(() => {
         location.reload();
@@ -1087,13 +1119,13 @@ if (outputInput) {
             const preInput = document.getElementById('pre');
             preInput.value = "LOW MASTERING IS STARTED ";
         } else {
-            showCustomAlert("The selected container does not match the mastering step number.");
+            showCustomAlert("The selected channel does not match the mastering step number.");
             setTimeout(() => {
         location.reload();
     }, 1000); // Reload after 2 seconds
         }
     } else {
-        showCustomAlert("Please select either 'All Parameters' or 'Parameterwise'.");
+        showCustomAlert("Please select either 'ALL CHANNELS' or 'CHANNEWISE'.");
         setTimeout(() => {
         location.reload();
     }, 1000); // Reload after 2 seconds
@@ -1131,145 +1163,130 @@ document.getElementById("highMasterBtn").addEventListener("click", function () {
     const isParameterwiseSelected = document.getElementById("parameterwise").checked;
 
     if (isAllParameterSelected) {
-        console.log("All Parameters selected.");
-        // Perform calculations for all parameters
-        highmaster.forEach((highValue, index) => {
-            if (step_no[index] == selectedMasteringValue) {
-                const selectedIndex = index; // Initialize selectedIndex properly within the loop
+    console.log("All Parameters selected.");
 
-                const b = parseFloat(highValue) || 0;
+    let allPassed = true;
+    const validIndices = [];
 
-                const probeNumber = probe_number[index];
-                const textareaId = mapProbeToTextareaId(probeNumber);
+    // 🔍 First: Check mastering condition for both indices
+    highmaster.forEach((highValue, index) => {
+        if (step_no[index] == selectedMasteringValue) {
+            const b = parseFloat(highValue) || 0;
 
-                const textarea = document.getElementById(textareaId);
-                const b1 = textarea ? parseFloat(textarea.value) || 0 : 0;
-
-                console.log(`Container ${index + 1}:`);
-                console.log("High Master value (b):", b);
-                console.log("Textarea value (b1):", b1);
-
-                const a = window.lowmasterValues[index] || 0;
-                const a1 = window.lowmasterA1Values[index] || 0;
-
-                const jobDia = id_od[selectedIndex]; // Get ID/OD value for this container
-
-                // // New conditions for ID/OD
-                // if (jobDia === "OD" && b1 <= a1) {
-                //     showCustomAlert(`DO PROPER MASTERING`);
-                //     return;
-                // } else if (jobDia === "ID" && b1 >= a1) {
-                //     showCustomAlert(`DO PROPER MASTERING`);
-                //     return;
-                // }
-
-                // New conditions for ID/OD with minimum difference check
-const difference = Math.abs(a1 - b1);
-
-if (jobDia === "OD" && (b1 <= a1 || difference < 1000)) {
-    showCustomAlert(`DO PROPER MASTERING`);
-    return;
-} else if (jobDia === "ID" && (b1 >= a1 || difference < 1000)) {
-    showCustomAlert(`DO PROPER MASTERING`);
-    return;
-}
-
-
-                const nominalValue = nominals[index] || 0;
-                performCalculations(a, a1, b, b1, nominalValue, index, textareaId, lsl, usl, ltl, utl, step_no,digits);
-
-                const highRawMasterInput = document.getElementById(`high_raw_count${index + 1}`);
-                if (highRawMasterInput) {
-                    highRawMasterInput.value = b1;
-                }
-
-
-                for (let index in calculationIntervals) {
-        clearInterval(calculationIntervals[index]);
-    }
-
-                const outputInput = document.getElementById(`center_input${index + 1}`);
-                if (outputInput) {
-                    outputInput.value = ""; // Clearing the value
-                    outputInput.style.backgroundColor = ""; // Reset background color if needed
-                }
-
-
-                const preInput = document.getElementById('pre');
-                preInput.value = "HIGH MASTERING IS STARTED ";
-            }
-        });
-    } else if (isParameterwiseSelected) {
-        console.log("Parameterwise selected.");
-        const selectedContainer = Array.from(document.querySelectorAll(".selected_radio"))
-            .find(radio => radio.checked);
-
-        if (!selectedContainer) {
-            showCustomAlert("Please select a container radio button before proceeding.");
-            setTimeout(() => {
-        location.reload();
-    }, 2000); // Reload after 2 seconds
-            return;
-        }
-
-        // Find the index of the selected container
-        const selectedIndex = Array.from(document.querySelectorAll(".selected_radio")).indexOf(selectedContainer);
-        
-        // if (step_no[selectedIndex] == selectedMasteringValue) {
-        if (step_no[selectedIndex]) {
-            const b = parseFloat(highmaster[selectedIndex]) || 0;
-
-            const probeNumber = probe_number[selectedIndex];
+            const probeNumber = probe_number[index];
             const textareaId = mapProbeToTextareaId(probeNumber);
-
             const textarea = document.getElementById(textareaId);
             const b1 = textarea ? parseFloat(textarea.value) || 0 : 0;
 
-            console.log(`Selected Container ${selectedIndex + 1}:`);
-            console.log("High Master value (b):", b);
-            console.log("Textarea value (b1):", b1);
+            const a1 = window.lowmasterA1Values[index] || 0;
+            const jobDia = id_od[index];
+            const difference = Math.abs(a1 - b1);
 
-            const a = window.lowmasterValues[selectedIndex] || 0;
-            const a1 = window.lowmasterA1Values[selectedIndex] || 0;
+            // ❌ If any one fails, mark as failed and exit
+            if ((jobDia === "OD" && (b1 <= a1 || difference < 1000)) ||
+                (jobDia === "ID" && (b1 >= a1 || difference < 1000))) {
+                showCustomAlert(`DO PROPER MASTERING`);
+                allPassed = false;
+            } else {
+                validIndices.push(index); // ✅ Track valid ones for next step
+            }
+        }
+    });
 
-            const jobDia = id_od[selectedIndex]; // Get ID/OD value for this container
+    // ⛔ If even one failed, exit early
+    if (!allPassed) {
+        return;
+    }
 
-            // // New conditions for ID/OD
-            // if (jobDia === "OD" && b1 <= a1) {
-            //     showCustomAlert(`DO PROPER MASTERING.`);
-            //     return;
-            // } else if (jobDia === "ID" && b1 >= a1) {
-            //     showCustomAlert(`DO PROPER MASTERING.`);
-            //     return;
-            // }
+    // ✅ Second: Perform calculations only if all passed
+    validIndices.forEach(index => {
+        const b = parseFloat(highmaster[index]) || 0;
+        const a = window.lowmasterValues[index] || 0;
+        const a1 = window.lowmasterA1Values[index] || 0;
+        const probeNumber = probe_number[index];
+        const textareaId = mapProbeToTextareaId(probeNumber);
+        const textarea = document.getElementById(textareaId);
+        const b1 = textarea ? parseFloat(textarea.value) || 0 : 0;
+        const nominalValue = nominals[index] || 0;
 
-            // New conditions for ID/OD with minimum difference check
-const difference = Math.abs(a1 - b1);
+        performCalculations(a, a1, b, b1, nominalValue, index, textareaId, lsl, usl, ltl, utl, step_no, digits);
 
-if (jobDia === "OD" && (b1 <= a1 || difference < 1000)) {
-    showCustomAlert(`DO PROPER MASTERING`);
-    return;
-} else if (jobDia === "ID" && (b1 >= a1 || difference < 1000)) {
-    showCustomAlert(`DO PROPER MASTERING`);
-    return;
+        const highRawMasterInput = document.getElementById(`high_raw_count${index + 1}`);
+        if (highRawMasterInput) {
+            highRawMasterInput.value = b1;
+        }
+
+        for (let key in calculationIntervals) {
+            clearInterval(calculationIntervals[key]);
+        }
+
+        const outputInput = document.getElementById(`center_input${index + 1}`);
+        if (outputInput) {
+            outputInput.value = "";
+            outputInput.style.backgroundColor = "";
+        }
+
+        const preInput = document.getElementById('pre');
+        preInput.value = "HIGH MASTERING IS STARTED ";
+    });
+}
+else if (isParameterwiseSelected) {
+    console.log("Parameterwise selected.");
+
+    const selectedContainer = Array.from(document.querySelectorAll(".selected_radio"))
+        .find(radio => radio.checked);
+
+    if (!selectedContainer) {
+        showCustomAlert("PLEASE SELECT THE CHANNEL NO!.");
+        setTimeout(() => {
+            location.reload();
+        }, 2000); // Reload after 2 seconds
+        return;
+    }
+
+    const selectedIndex = Array.from(document.querySelectorAll(".selected_radio"))
+        .indexOf(selectedContainer);
+
+    // Proceed only if the selected index matches a step
+    if (step_no[selectedIndex] == selectedMasteringValue) {
+        const b = parseFloat(highmaster[selectedIndex]) || 0;
+
+        const probeNumber = probe_number[selectedIndex];
+        const textareaId = mapProbeToTextareaId(probeNumber);
+        const textarea = document.getElementById(textareaId);
+        const b1 = textarea ? parseFloat(textarea.value) || 0 : 0;
+
+        const a = window.lowmasterValues[selectedIndex] || 0;
+        const a1 = window.lowmasterA1Values[selectedIndex] || 0;
+
+        const jobDia = id_od[selectedIndex];
+        const difference = Math.abs(a1 - b1);
+
+        // 🔴 Mastering validation condition
+        if (
+            (jobDia === "OD" && (b1 <= a1 || difference < 1000)) ||
+            (jobDia === "ID" && (b1 >= a1 || difference < 1000))
+        ) {
+            showCustomAlert("DO PROPER MASTERING");
+            return;
+        }
+
+        // ✅ All OK → Proceed
+        const nominalValue = nominals[selectedIndex] || 0;
+        performCalculations(a, a1, b, b1, nominalValue, selectedIndex, textareaId, lsl, usl, ltl, utl, step_no, digits);
+
+        const highRawMasterInput = document.getElementById(`high_raw_count${selectedIndex + 1}`);
+        if (highRawMasterInput) {
+            highRawMasterInput.value = b1;
+        }
+
+        const preInput = document.getElementById('pre');
+        preInput.value = `HIGH MASTERING IS STARTED `;
+    } else {
+        showCustomAlert("The selected container does not match the mastering group.");
+    }
 }
 
-            const nominalValue = nominals[selectedIndex] || 0;
-            performCalculations(a, a1, b, b1, nominalValue, selectedIndex, textareaId, lsl, usl, ltl, utl, step_no,digits);
-            
-            const highRawMasterInput = document.getElementById(`high_raw_count${selectedIndex + 1}`);
-            if (highRawMasterInput) {
-                highRawMasterInput.value = b1;
-            }
-
-            const preInput = document.getElementById('pre');
-            preInput.value = `HIGH MASTERING IS STARTED `;
-        } else {
-            customAlert("The selected container does not match the mastering step number.");
-        }
-    } else {
-        customAlert("Please select either 'All Parameters' or 'Parameterwise'.");
-    }
 });
 
 
@@ -1401,14 +1418,14 @@ document.getElementById("singleMasterBtn").addEventListener("click", function ()
             const preInput = document.getElementById('pre');
             preInput.value = `SINGLE MASTERING IS STARTED `;
         } else {
-            showCustomAlert("This parameter does not use SINGLE mastering .");
+            showCustomAlert("This channel does not use SINGLE mastering .");
             setTimeout(() => {
         location.reload();
     }, 1000); // Reload after 2 seconds
         }
 
     } else {
-        showCustomAlert("Please select either 'All Parameters' or 'Parameterwise'.");
+        showCustomAlert("Please select either 'ALL CHANNELS' or 'CHANNELWISE'.");
         setTimeout(() => {
         location.reload();
     }, 1000); // Reload after 2 seconds

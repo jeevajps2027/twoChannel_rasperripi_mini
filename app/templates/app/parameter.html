@@ -905,6 +905,27 @@ $(document).ready(function () {
                 if (!stepGroups[stepNo]) stepGroups[stepNo] = [];
                 stepGroups[stepNo].push(row);
             }
+                        // ✅ Check if STEP_NO sequence only increases by 1 or stays the same
+let lastStepNo = null;
+
+for (let i = 0; i < allRowsData.length; i++) {
+    const row = allRowsData[i];
+    if (!row.parameter_name || !row.step_no) continue; // Skip empty rows
+
+    const stepNo = parseInt(row.step_no);
+    if (isNaN(stepNo)) continue;
+
+    if (lastStepNo === null) {
+        lastStepNo = stepNo;
+    } else {
+        if (stepNo < lastStepNo || stepNo > lastStepNo + 1) {
+            validationFailed = true;
+            validationMessage += `Row ${i + 1}: STEP_NO should be same as previous or incremented by 1 (found ${stepNo}, expected ${lastStepNo} or ${lastStepNo + 1}).\n`;
+        }
+        lastStepNo = stepNo;
+    }
+}
+                                                                                                                                             
 
             const channelNo = row.channel_no;
             if (channelNo) {

@@ -8,10 +8,11 @@ import pandas as pd
 from django.http import JsonResponse
 from app.models import MeasurementData, paraTableData ,Customer
 
+
 def report(request):
     if request.method == 'POST':
         raw_data = request.POST.get('data')
-        print("raw_data",raw_data)
+        print("raw_data", raw_data)
         if raw_data:
             data = json.loads(raw_data)
 
@@ -38,13 +39,9 @@ def report(request):
 
             filtered_data = MeasurementData.objects.filter(**filter_kwargs).order_by('date')
 
-
             if not filtered_data.exists():
-                 return JsonResponse({'error': 'No data found for the given criteria'}, status=404)
+                return JsonResponse({'error': 'NO DATA FOUND '}, status=404)
 
-            
-
-            # Data dictionary for the table
             data_dict = {
                 'Date': [],
                 'Job Numbers': [],
@@ -53,10 +50,9 @@ def report(request):
                 'Status': [],
             }
 
-            # Add parameter data keys dynamically
             parameter_data = paraTableData.objects.filter(
                 parameter_settings__part_model=part_model
-            ).values('parameter_name', 'usl', 'lsl').order_by('id')
+            ).values('parameter_name', 'usl', 'lsl', 'utl', 'ltl').order_by('id')
 
             for param in parameter_data:
                 param_name = param['parameter_name']
@@ -66,29 +62,30 @@ def report(request):
                 data_dict[key] = []
 
             unique_dates = set()
-            # Group data by Date
             grouped_data = {}
             for record in filtered_data:
                 date = record.date.strftime('%d-%m-%Y %I:%M:%S %p')
-                unique_dates.add(date)  # Track unique dates
+                unique_dates.add(date)
                 if date not in grouped_data:
                     grouped_data[date] = {
                         'Job Numbers': set(),
                         'Shift': record.shift,
                         'Operator': record.operator,
                         'Status': record.overall_status,
-                        'Parameters': {key: set() for key in data_dict if key not in ['Date', 'Shift', 'Operator', 'Status', 'Job Numbers']}
+                        'Parameters': {
+                            key: set() for key in data_dict if key not in ['Date', 'Shift', 'Operator', 'Status', 'Job Numbers']
+                        }
                     }
 
-                # Collect unique job numbers
                 if record.comp_sr_no:
                     grouped_data[date]['Job Numbers'].add(record.comp_sr_no)
 
-                # Add parameter data
                 for param in parameter_data:
                     param_name = param['parameter_name']
                     usl = param['usl']
                     lsl = param['lsl']
+                    utl = param['utl']
+                    ltl = param['ltl']
                     key = f"{param_name} <br>{usl} <br>{lsl}"
 
                     parameter_values = MeasurementData.objects.filter(
@@ -98,65 +95,79 @@ def report(request):
                     )
 
                     for pv in parameter_values:
-                        value_to_display = ""
+                        value = None
                         if mode == 'max':
-                            value_to_display = pv.max_value
+                            value = pv.max_value
                         elif mode == 'min':
-                            value_to_display = pv.min_value
+                            value = pv.min_value
                         elif mode == 'tir':
-                            value_to_display = pv.tir_value
+                            value = pv.tir_value
                         else:
-                            value_to_display = pv.output
+                            value = pv.output
 
-                        status_cell_value = pv.statusCell  # Assuming statusCell contains ACCEPT, REWORK, or REJECT
+                        value_to_display = value
 
-                        # Define color mapping for different statuses
-                        status_colors = {
-                            'ACCEPT': '#00ff00',  # Green
-                            'REWORK': 'yellow',
-                            'REJECT': 'red'
-                        }
-
-                        # Apply background color ONLY if mode is 'output'
+                        # Status-based color only for 'readings' mode
                         if mode == 'readings':
+                            status_cell_value = pv.statusCell
+                            status_colors = {
+                                'ACCEPT': '#00ff00',
+                                'REWORK': 'yellow',
+                                'REJECT': 'red'
+                            }
                             bg_color = status_colors.get(status_cell_value, 'white')
-                            value_to_display = f'<span style="background-color: {bg_color}; padding: 5px; border-radius: 3px;">{value_to_display}</span>'
+                            value_to_display = f'<span style="background-color: {bg_color}; padding: 5px; border-radius: 3px;">{value}</span>'
+
+                        # Range-based coloring for 'max' or 'min' mode
+                        elif mode in ['max', 'min'] and value is not None:
+                            try:
+                                value_float = float(value)
+                                ltl = float(ltl)
+                                lsl = float(lsl)
+                                usl = float(usl)
+                                utl = float(utl)
+
+                                if value_float < ltl:
+                                    bg_color = "red"
+                                elif ltl <= value_float < lsl:
+                                    bg_color = "yellow"
+                                elif lsl <= value_float <= usl:
+                                    bg_color = "#00ff00"
+                                elif usl < value_float <= utl:
+                                    bg_color = "yellow"
+                                elif value_float > utl:
+                                    bg_color = "red"
+                                else:
+                                    bg_color = "white"
+
+                                value_to_display = f'<span style="background-color: {bg_color}; padding: 5px; border-radius: 3px;">{value}</span>'
+                            except (ValueError, TypeError):
+                                value_to_display = f'<span>{value}</span>'
 
                         grouped_data[date]['Parameters'][key].add(value_to_display)
 
-
-            # Convert grouped data into a DataFrame
             for date, group in grouped_data.items():
                 data_dict['Date'].append(date)
-
-                # Join all job numbers as a single string for display
                 job_numbers_combined = "<br>".join(sorted(group['Job Numbers']))
                 data_dict['Job Numbers'].append(job_numbers_combined)
-
                 data_dict['Shift'].append(group['Shift'])
                 data_dict['Operator'].append(group['Operator'])
 
                 status = group['Status']
-
-                # Apply background color only to Status
                 status_colors = {
-                    'ACCEPT': '#00ff00',  # Green
+                    'ACCEPT': '#00ff00',
                     'REWORK': 'yellow',
                     'REJECT': 'red',
                 }
-                status_color = status_colors.get(status, 'transparent')  # Default transparent if unknown
-                
+                status_color = status_colors.get(status, 'transparent')
                 status_display = f'<span style="background-color: {status_color}; color: black; padding: 5px; border-radius: 3px;">{status}</span>'
                 data_dict['Status'].append(status_display)
 
                 for key, values in group['Parameters'].items():
-                    # Combine unique values and display only once
-                   data_dict[key].append("<br>".join(sorted(map(str, values))))
-
+                    data_dict[key].append("<br>".join(sorted(map(str, values))))
 
             df = pd.DataFrame(data_dict)
             df.index = df.index + 1
-
             table_html = df.to_html(index=True, escape=False, classes='table table-striped')
 
             return JsonResponse({

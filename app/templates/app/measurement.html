@@ -365,9 +365,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  pointer-events: none; /* 👈 Let clicks go through */
 }
 
 .modal-box_1 {
+    pointer-events: auto;
   background-color: yellow;
   padding: 20px 30px;
   border-radius: 10px;
@@ -861,75 +863,83 @@ $(document).ready(function () {
 
 
 
-// Initialize the list of part names and the current index
-let receivedValue = "{{ part_model|safe }}";
-console.log('your part_model is:', receivedValue);
-
-let partNames = receivedValue
-    .replace(/[\[\]' ]/g, '')  // Remove [, ], ', and spaces
-    .split(',');               // Split by comma to get an array
-
-// Get the current part from the input field
-const currentPartModel = document.getElementById('part_model').value;
-
-// Set currentIndex based on current part model
-let currentIndex = partNames.indexOf(currentPartModel);
-
-// If not found, default to 0
-if (currentIndex === -1) {
-    currentIndex = 0;
-}
-
-function showNextPartName() {
-    if (partNames.length > 0) {
-        // Move to the next index
-        currentIndex = (currentIndex + 1) % partNames.length;
-
-        const partModel = partNames[currentIndex];
-        document.getElementById('part_model').value = partModel;
-
-        sendPartModelToBackend(partModel);
-        sendPartModelForCount(partModel);
-
-      
-    } else {
-        showNotifications("No part names available.");
-    }
-}
-
-// // Add a keydown event listener for the F2 key
-// document.addEventListener('keydown', (event) => {
-//     if (event.key === 'F2') {
-//         // Prevent the default behavior of the F2 key (e.g., renaming files in some OS)
-//         event.preventDefault();
-
-//         // Call the showNextPartName function
-//         showNextPartName();
-//     }
-// });
 
 
-// Initialize the part model input on page load and send the initial value
-$(document).ready(function () {
-    if (partNames.length > 0) {
-        // Initialize the input box with the first part name
-        const initialPartModel = partNames[0];
-        $('#part_model').val(initialPartModel);
 
-        // Send the initial part model to the backend
-        console.log("Initial partModel sent to the backend:", initialPartModel);
-        sendPartModelToBackend(initialPartModel);
-    } else {
-        console.warn("No part names available on page load.");
-    }
-});
 
-        // Initialize the input box on page load
-        window.onload = function () {
-            if (partNames.length > 0) {
-                document.getElementById('part_model').value = partNames[0];
+
+
+
+
+ // Receive part model list and current part model from Django
+ let receivedValue = "{{ part_model|safe }}";     // ['DIAMILER_1231', 'FUSO_12', 'sai', '111111']
+    let receivedPartModel = "{{ part_name|safe }}";  // '111111'
+
+    console.log('your part_model is:', receivedValue);
+    console.log('your receivedPartModel is:', receivedPartModel);
+
+    // Convert to clean array
+    let partNames = receivedValue.replace(/[\[\]' ]/g, '').split(',');
+    console.log("Clean partNames:", partNames);
+
+    // Get current index based on receivedPartModel
+    let currentIndex = partNames.indexOf(receivedPartModel);
+    if (currentIndex === -1) currentIndex = 0;
+
+    // Global alert variables
+    let alertTimeoutId = null;
+    let alertIntervalId = null;
+    let activePartModel = null;
+    let latestResponseData = null;
+
+    function showNextPartName() {
+        if (partNames.length > 0) {
+            // Get next part circularly
+            currentIndex = (currentIndex + 1) % partNames.length;
+            const nextPartModel = partNames[currentIndex];
+
+            // Update input
+            document.getElementById('part_model').value = nextPartModel;
+            document.getElementById("notificationModal_1").style.display = "none";
+
+            // Backend logic
+            sendPartModelToBackend(nextPartModel);
+            sendPartModelForCount(nextPartModel);
+
+            if (latestResponseData) {
+                handleIntervalAlerts(latestResponseData, nextPartModel);
             }
-        };
+
+            // 🔄 Reload page
+            location.reload();
+        } else {
+            showNotifications("No part names available.");
+        }
+    }
+
+    // On page load, send backend the current received part
+    $(document).ready(function () {
+        if (receivedPartModel) {
+            $('#part_model').val(receivedPartModel);
+            console.log("Initial partModel sent to backend:", receivedPartModel);
+            sendPartModelToBackend(receivedPartModel);
+        } else {
+            console.warn("No receivedPartModel provided.");
+        }
+    });
+
+    // Optional — don't override with index 0 blindly
+    window.onload = function () {
+        if (receivedPartModel) {
+            document.getElementById('part_model').value = receivedPartModel;
+        }
+    };
+
+
+
+
+
+        
 /////////////////////////////////////////////////////////////////
 
 
@@ -1034,6 +1044,7 @@ if (response.punch_no_value === false) {
             punchBox.style.display = 'none';
         }
     }
+    
 
 } else if (response.punch_no_value === true) {
     console.log("TRUE CONDITION: punch_no_value is true");
@@ -1093,6 +1104,7 @@ if (response.punch_no_value === false) {
                         // Validation checks for input value
                         if (charLockValue && !inputValue.startsWith(charLockValue)){
                             showNotifications("INVALID PUNCH NUMBER");
+                            
                             punchNoField.value = '';
                             punchNoField.focus();
 
@@ -1102,7 +1114,7 @@ if (response.punch_no_value === false) {
                         const expectedLength = Number(charLockLimitValue);
                         if (expectedLength > 0 && inputValue.length !== expectedLength) {
                             showNotifications("INVALID PUNCH NUMBER");
-
+                            
                             
 
                             punchNoField.value = '';
@@ -1331,8 +1343,15 @@ notificationBar.value = `DO MEASUREMENT FOR STEP ${currentStep} `;
                 digitsArray: response.digits_array,
                 singleDoubleArray : response.single_double_array,
                 parameter_factor_values:response.parameter_factor_values,
+                interval_settings_json:response.interval_settings_json,
+                last_stored_dates:response.last_stored_dates,
+                
                 
             };
+            setTimeout(() => {
+    handleIntervalAlerts(responseData);
+}, 500); // 3000 ms = 3 seconds
+
 
 
             console.log("Step No:", response.step_no_array);
@@ -1608,6 +1627,61 @@ notificationBar.value = `DO MEASUREMENT FOR STEP ${currentStep} `;
         },
         error: function (xhr, status, error) {
             console.error('Error:', error);
+        }
+    });
+}
+
+
+
+
+function handleIntervalAlerts(responseData, partModel) {
+    const startDate = new Date(responseData.last_stored_dates);
+    const intervalSettings = JSON.parse(responseData.interval_settings_json);
+    document.getElementById("notificationModal_1").style.display = "none";
+
+    // Clear any existing timers to prevent multiple alerts
+    if (alertTimeoutId) {
+        clearTimeout(alertTimeoutId);
+        alertTimeoutId = null;
+    }
+    if (alertIntervalId) {
+        clearInterval(alertIntervalId);
+        alertIntervalId = null;
+    }
+
+    activePartModel = partModel; // Set active model
+
+    intervalSettings.forEach(setting => {
+        const hours = setting.hour;
+        const minutes = setting.minute;
+        const interval = (hours * 60 + minutes) * 60 * 1000;
+
+        const firstAlertTime = new Date(startDate.getTime() + interval);
+        const now = new Date();
+        const timeUntilFirstAlert = firstAlertTime - now;
+
+        if (timeUntilFirstAlert > 0) {
+            alertTimeoutId = setTimeout(() => {
+                if (activePartModel === partModel) {
+                    showNotifications1("DO MASTERING !", partModel);
+                }
+
+                alertIntervalId = setInterval(() => {
+                    if (activePartModel === partModel) {
+                        showNotifications1("DO MASTERING !", partModel);
+                    }
+                }, interval);
+            }, timeUntilFirstAlert);
+        } else {
+            if (activePartModel === partModel) {
+                showNotifications1("DO MASTERING !", partModel);
+            }
+
+            alertIntervalId = setInterval(() => {
+                if (activePartModel === partModel) {
+                    showNotifications1("DO MASTERING !", partModel);
+                }
+            }, interval);
         }
     });
 }
@@ -2770,8 +2844,9 @@ function sendPartModelForCount(partModel) {
         data: JSON.stringify({ part_names: partModel }), // Send partModel as JSON
         contentType: "application/json", // Specify JSON content type
         success: function (response) {
-            console.log("Part model sent successfully:", partModel);
-            console.log("Response from server:", response);
+            console.log("Part model sent successfully yyyyyyyyyyyyyyyyyy:", partModel);
+            console.log("Response from server: jjjjjjjjjjjjjjjjjjjjjjjjj", response);
+
         },
         error: function (error) {
             console.error("Error sending part model:", error);
@@ -3363,57 +3438,6 @@ $(document).ready(function () {
 });
 
 
-
-
-
-document.addEventListener("DOMContentLoaded", function() {
-    var master_date = "{{last_stored_dates}}";
-    console.log("master_date", master_date);
-
-    // Parse the master_date string to get the starting timestamp
-    const startDate = new Date(master_date);
-    console.log("Parsed Start Date:", startDate);
-    const partModel = document.getElementById("part_model").value;
-    // Access the interval settings JSON
-    const intervalSettings = JSON.parse('{{ interval_settings_json|escapejs }}');
-
-    intervalSettings.forEach(setting => {
-        
-        console.log("Hour:", setting.hour);
-        console.log("Minute:", setting.minute);
-       
-
-       
-            const hours = setting.hour;
-            const minutes = setting.minute;
-
-            // Calculate the interval in milliseconds
-            const interval = (hours * 60 + minutes) * 60 * 1000;
-            
-            // Calculate the first alert time
-            const firstAlertTime = new Date(startDate.getTime() + interval);
-            const now = new Date();
-            const timeUntilFirstAlert = firstAlertTime - now;
-
-            console.log("First Alert Time:", firstAlertTime);
-            console.log("Time Until First Alert (ms):", timeUntilFirstAlert);
-
-            // Set a timeout for the first alert
-            setTimeout(() => {
-               
-                showNotifications1("TIME FOR MASTERING !", partModel);
-
-                // Set intervals for subsequent alerts
-                setInterval(() => {
-                    showNotifications1("TIME FOR MASTERING !", partModel);
-                }, interval);
-
-            }, timeUntilFirstAlert);
-        
-
-  
-    });
-});
 
 
 

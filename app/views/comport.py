@@ -181,13 +181,26 @@ def comport(request):
                     )
 
                 return JsonResponse({'status': 'success', 'message': 'Master interval saved'})
+            
+            elif request_type == "delete_shift":
+                shift = data.get('shift')
+                if shift:
+                    try:
+                        shift_obj = Data_Shift.objects.get(shift=shift)
+                        shift_obj.delete()
+                        return JsonResponse({"status": "success", "message": "Shift deleted successfully!"})
+                    except Data_Shift.DoesNotExist:
+                        return JsonResponse({"status": "error", "message": "INVALID SHIFT."})
+                else:
+                    return JsonResponse({"status": "error", "message": "Missing shift value"})
+
 
             
             else:
                 return JsonResponse({"status": "error", "message": "Unknown request type"})
 
         except Exception as e:
-            return JsonResponse({"status": "error", "message": str(e)})
+            return JsonResponse({"status": "error", "message": "CHECK THE VALUE"})
         
     elif request.method == "GET":
         ports = serial.tools.list_ports.comports()
