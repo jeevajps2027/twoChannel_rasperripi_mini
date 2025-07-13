@@ -176,17 +176,9 @@ input[type="text"]:focus {
     z-index: 1000;
     font-size: 18px;
     text-align: center;
-    animation: fadeOut 3s forwards; /* Animation for fading out */
+  
 }
 
-@keyframes fadeOut {
-    0% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-    }
-}
 
 .overlay {
     position: fixed;

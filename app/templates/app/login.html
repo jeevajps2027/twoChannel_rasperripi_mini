@@ -8,7 +8,7 @@
     <script src="{% static 'jquery-jquery-f79d5f1/dist/jquery.min.js' %}"></script>
 
 
-    <link rel="stylesheet" href="{% static 'css/login_p.css' %}">
+    <link rel="stylesheet" href="{% static 'css/login_v1.css' %}">
 
     <title>LOGIN</title>
 
@@ -156,28 +156,36 @@ input:focus, button:focus {
 }
 
 .modal-box {
-  background-color: white;
+  background-color: yellow;
   padding: 20px 30px;
   border-radius: 10px;
   text-align: center;
+  align-items: center;
   box-shadow: 0 0 10px #000000aa;
-  max-width: 400px;
+  height: 30%;
+  width: 50%;
+  font-size: 3vw;
+  font-weight: bold;
 }
 
 .modal-box button {
   margin-top: 20px;
   padding: 8px 20px;
-  font-size: 16px;
+  font-size: 2.5vw;
+  background-color: red;
+  width: 40%;
+  font-weight: bold;
 }
 
 #notificationOkBtn:focus {
     outline: 2px solid #007bff;
-    background-color: #e6f0ff;
+    background-color: red;
 }
+
 
 #notificationMessage {
     color: black;       /* or a visible color */
-    font-size: 16px;    /* readable size */
+    font-size: 3vw;    /* readable size */
     margin-bottom: 10px;
 }
 
@@ -238,7 +246,7 @@ margin-top: 1%;
     z-index: 1000;
     font-size: 3vw;
     text-align: center;
-    animation: fadeOut 3s forwards; /* Animation for fading out */
+    
 }
 
 
@@ -639,7 +647,7 @@ function displayNotification(message, type) {
     // Hide the notification after 5 seconds
     setTimeout(() => {
         notification.style.display = 'none';
-    }, 5000);
+    }, 10000);
 }
 
 // Function to get the CSRF token for Django
@@ -682,7 +690,7 @@ function handleLogin() {
 
     // Check if username or password is empty
     if (!username || !password) {
-        showNotifications('Username and Password are required!');
+        showNotifications('USERNAME AND PASSWORD REQUIRED!');
         return;
     }
 

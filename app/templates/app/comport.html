@@ -241,6 +241,12 @@
 }
 
 
+.toggle-btn.active-btn {
+    background-color: #007bff;
+    color: white;
+}
+
+
 </style>
 <body>
 <div class="container-1">
@@ -395,12 +401,12 @@ function showNotifications(message) {
         
         <div class="sub-container-2 sub-container">
             <div class="left_container">
-                <button id="operators" class="toggle-btn">OPERATORS</button>
-                <button id="shift_settings" class="toggle-btn">SHIFT SETTINGS</button>
-                <button id="backup" class="toggle-btn">BACKUP</button>
+                <button id="operators" class="toggle-btn" data-index="1" >OPERATORS</button>
+                <button id="shift_settings" class="toggle-btn" data-index="2">SHIFT SETTINGS</button>
+                <button id="backup" class="toggle-btn" data-index="3">BACKUP</button>
                 
-                <button id="parameter_factor" class="toggle-btn">PARAMETER FACTOR</button>
-                <button id="master_interval" class="toggle-btn">MASTER INTERVAL</button>
+                <button id="parameter_factor" class="toggle-btn" data-index="4">PARAMETER FACTOR</button>
+                <button id="master_interval" class="toggle-btn" data-index="5">MASTER INTERVAL</button>
             </div>
             <div class="right_container" style="overflow-y: auto;">
                 <table id="table1" class="table hidden">
@@ -732,6 +738,13 @@ document.getElementById("delete_btn_shift").addEventListener("click", function (
         if (data.status === "success") {
             document.getElementById("shift").value = "";  // Clear the input field
             showNotifications("Shift deleted successfully!");
+            localStorage.setItem("activeTab", "settings");
+    localStorage.setItem("activeButton", "shift_settings");
+
+    setTimeout(() => {
+        location.reload();
+    }, 2500);
+
         } else {
             showNotifications(data.message || "Failed to delete shift.");
         }
@@ -840,6 +853,12 @@ body: JSON.stringify(data) // Convert data to JSON string
 .then(result => {
 if (result.status === 'success') {
     showNotifications('Backup settings saved successfully!');
+    localStorage.setItem("activeTab", "settings");
+    localStorage.setItem("activeButton", "backup");
+
+    setTimeout(() => {
+        location.reload();
+    }, 2500);
    
 } else {
     showNotifications('Failed to save backup settings. Please try again.');
@@ -1708,30 +1727,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 
+// document.addEventListener('DOMContentLoaded', () => {
+//     const buttons = document.querySelectorAll('.toggle-btn');
+//     const containers = document.querySelectorAll('.table');
+
+//     // Initial visibility setup
+//     const initialTables = ['table1'];
+//     initialTables.forEach(tableId => {
+//         const table = document.getElementById(tableId);
+//         if (table) {
+//             table.classList.remove('hidden');
+//         }
+//     });
+
+//     buttons.forEach(button => {
+//         button.addEventListener('click', () => {
+//             // Remove .hidden from target table
+//             containers.forEach(container => container.classList.add('hidden'));
+
+//             const index = button.getAttribute('data-index');
+//             const target = document.getElementById(`table${index}`);
+//             if (target) {
+//                 target.classList.remove('hidden');
+//             }
+//         });
+//     });
+// });
+
+
+
+
 document.addEventListener('DOMContentLoaded', () => {
     const buttons = document.querySelectorAll('.toggle-btn');
-    const containers = document.querySelectorAll('.table');
 
-    // Ensure table1 and table4 are visible initially
-    const initialTables = ['table1'];
-    initialTables.forEach(tableId => {
-        const table = document.getElementById(tableId);
-        if (table) {
-            table.classList.remove('hidden');
-        }
-    });
-
-    buttons.forEach((button, index) => {
+    buttons.forEach(button => {
         button.addEventListener('click', () => {
-            // Hide all containers
-            containers.forEach(container => container.classList.add('hidden'));
-            // Show the corresponding container
-            const target = document.getElementById(`table${index + 1}`);
-            if (target) {
-                target.classList.remove('hidden');
-            }
+            buttons.forEach(btn => btn.classList.remove('active-btn'));
+            button.classList.add('active-btn');
+
+            // ✅ Show correct table and hide others
+            handleToggleButtonClick(button);
         });
     });
+});
+
+
+
+
+function handleToggleButtonClick(button) {
+    const containers = document.querySelectorAll('.table');
+    const index = button.getAttribute('data-index');
+
+    // Hide all tables
+    containers.forEach(container => container.classList.add('hidden'));
+
+    // Show selected table
+    const target = document.getElementById(`table${index}`);
+    if (target) {
+        target.classList.remove('hidden');
+        console.log(`📊 Showing table index: table${index}`);
+    } else {
+        console.warn(`❌ Table not found for index: ${index}`);
+    }
+}
+
+
+// ❌ REMOVE this if present:
+const initialTables = ['table1'];
+initialTables.forEach(tableId => {
+    const table = document.getElementById(tableId);
+    if (table) {
+        table.classList.remove('hidden');
+    }
 });
 
 
@@ -1816,7 +1883,7 @@ function addRow() {
     // Create and append cells to the new row
     newRow.innerHTML = `
         <td>${rowCount + 1}</td>
-        <td><input type="text" class="no-outline" style="width: 100%;" oninput="this.value = this.value.toUpperCase();"></td>
+         <td><input type="text" class="no-outline" style="width: 100%;" oninput="this.value = this.value.replace(/[^0-9]/g, '');"></td>
         <td><input type="text" class="no-outline" style="width: 100%;" oninput="this.value = this.value.toUpperCase();"></td>
     `;
 
@@ -1867,27 +1934,45 @@ function saveData() {
     });
 }
 
-
 document.addEventListener("DOMContentLoaded", function () {
-    const activeTab = localStorage.getItem("activeTab");
+    setTimeout(() => {
+        const activeTab = localStorage.getItem("activeTab");
+        const activeButtonId = localStorage.getItem("activeButton");
 
-    if (activeTab === "settings") {
-        showSubContainer(2);  // Show the settings content
+        console.log("📦 DOMContentLoaded: Loaded from localStorage:", {
+            activeTab,
+            activeButtonId
+        });
 
-        // Activate the SETTINGS button
-        const settingsButton = document.querySelector('button[onclick="showSubContainer(2)"]');
-        if (settingsButton) {
-            // Remove active from all buttons first
-            document.querySelectorAll('.container-1-2 button').forEach(btn => btn.classList.remove('active-btn'));
+        if (activeTab === "settings") {
+            showSubContainer(2);
 
-            // Add active class to SETTINGS button
-            settingsButton.classList.add('active-btn');
+            const settingsTabBtn = document.querySelector('button[onclick="showSubContainer(2)"]');
+            if (settingsTabBtn) {
+                document.querySelectorAll('.container-1-2 button').forEach(btn => btn.classList.remove('active-btn'));
+                settingsTabBtn.classList.add('active-btn');
+            }
+
+            if (activeButtonId) {
+                const innerButton = document.getElementById(activeButtonId);
+                if (innerButton) {
+                    console.log(`➡️ Restoring and clicking inner button: #${activeButtonId}`);
+                    innerButton.click();  // ✅ now works because click handler is attached
+                } else {
+                    console.warn(`⚠️ Inner button not found: ${activeButtonId}`);
+                }
+            }
+
+            localStorage.removeItem("activeTab");
+            localStorage.removeItem("activeButton");
         }
+    }, 50);  // 🔁 This ensures click handler is attached first
+});
 
-        // Clear the flag
-        localStorage.removeItem("activeTab");
-    }
-})
+
+
+
+
 
     function getCSRFToken() {
         const cookies = document.cookie.split("; ");

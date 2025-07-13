@@ -802,21 +802,42 @@ function fetchAndDisplayValues(selectedMasterGroup) {
 
             const availableContainers = probeNumbers.length;
 
-            const masterGroupsValues = [...new Set(fetchedData.master_grp)];
+            const masteringSelect = document.getElementById("mastering");
 
+// Get current selected value before changing
+const currentSelected = masteringSelect.value;
 
-const masteringSelect = document.getElementById("mastering");
+// Get new values (assumed from backend)
+const masterGroupsValues = [...new Set(fetchedData.master_grp)];
 
-// Clear old options
-masteringSelect.innerHTML = '';
+// Check if existing options are same as new options
+const existingOptions = Array.from(masteringSelect.options).map(opt => opt.value);
+const isSame = masterGroupsValues.length === existingOptions.length &&
+               masterGroupsValues.every((val, idx) => val == existingOptions[idx]);
 
-// Add new options dynamically from fetchedData
-masterGroupsValues.forEach(value => {
-    const option = document.createElement("option");
-    option.value = value;
-    option.textContent = value;
-    masteringSelect.appendChild(option);
-});
+if (!isSame) {
+    // Only update if different
+    masteringSelect.innerHTML = '';
+
+    // Optional default
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = "-- Select Group --";
+    masteringSelect.appendChild(defaultOption);
+
+    // Add new options
+    masterGroupsValues.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        masteringSelect.appendChild(option);
+    });
+
+    // Restore selected value if it still exists
+    if (masterGroupsValues.includes(currentSelected)) {
+        masteringSelect.value = currentSelected;
+    }
+}
 
             
 
