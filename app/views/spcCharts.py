@@ -77,27 +77,39 @@ def generate_readings_table(subgroups, x_bars, ranges):
     df.loc['X̄ (Mean)'] = x_bars[:max_columns]
     df.loc['R̄ (Range)'] = ranges[:max_columns]
 
+    
     style = """
     <style>
-        table.table {
-            font-size: 1.5vw;
-            width: 100%;
-            height:100%;
-        }
-        table.table th, table.table td {
-            padding: 2px;
-            max-width: 50px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-        table.table th {
-            background-color: black;
-            color:white;
-            border:1px solid white;
-        }
-    </style>
-    """
+    .table-wrapper {
+        max-height: 70vh;  /* Adjust as needed */
+        overflow-x: auto;
+        overflow-y: auto;
+        border: 1px solid #ccc;
+    }
+
+    table.table {
+        font-size: 1.5vw;
+        width: max-content; /* ensures horizontal scroll when needed */
+        height: 100%;
+        border-collapse: collapse;
+    }
+
+    table.table th, table.table td {
+        padding: 2px;
+        max-width: 130px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        border: 1px solid #ccc;
+    }
+
+    table.table th {
+        background-color: black;
+        color: white;
+        border: 1px solid white;
+    }
+</style>
+"""
 
     return alert_message + style + df.to_html(classes="table table-striped", index=True, header=True)
 

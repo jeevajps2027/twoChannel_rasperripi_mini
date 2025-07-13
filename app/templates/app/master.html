@@ -412,7 +412,7 @@ input[type="radio"] {
 
 
     <div class="container-5">
-        <div class="probe-container">
+        <div class="probe-container" style="display: none;">
             <p>P1:</p><textarea id="probe-A"></textarea>
             <p>P2:</p><textarea id="probe-B"></textarea>
             <p>P3:</p><textarea id="probe-C"></textarea>
@@ -1374,7 +1374,17 @@ document.getElementById("singleMasterBtn").addEventListener("click", function ()
                 const textarea = document.getElementById(textareaId);
 
                 const a1 = 0; // Analog Zero fixed at 0
-                const b1 = textarea ? parseFloat(textarea.value) || 0 : 0;
+                let b1 = 0;
+if (textarea) {
+    b1 = parseFloat(textarea.value) || 0;
+    if (b1 === 0) {
+        showCustomAlert("DO PROPER SINGLE MASTERING !");
+        return;
+    }
+} else {
+    showCustomAlert("DO PROPER SINGLE MASTERING !");
+    return;
+}
 
                 console.log(`📦 Container ${index + 1}: SINGLE`);
                 console.log("🔹 Analog Zero (a):", a, "| a1:", a1);
@@ -1402,7 +1412,7 @@ document.getElementById("singleMasterBtn").addEventListener("click", function ()
             .find(radio => radio.checked);
 
         if (!selectedRadio) {
-            showCustomAlert("Please select a container radio button before proceeding.");
+            showCustomAlert("Please select a CHANNEL ");
             setTimeout(() => {
         location.reload();
     }, 1000); // Reload after 2 seconds
@@ -1419,7 +1429,17 @@ document.getElementById("singleMasterBtn").addEventListener("click", function ()
             const textarea = document.getElementById(textareaId);
 
             const a1 = 0; // Analog Zero is 0
-            const b1 = textarea ? parseFloat(textarea.value) || 0 : 0;
+            let b1 = 0;
+if (textarea) {
+    b1 = parseFloat(textarea.value) || 0;
+    if (b1 === 0) {
+        showCustomAlert("DO PROPER SINGLE MASTERING !");
+        return;
+    }
+} else {
+    showCustomAlert("DO PROPER SINGLE MASTERING !");
+    return;
+}
 
             console.log(`📦 Selected Container ${selectedIndex + 1}: SINGLE`);
             console.log("🔹 Analog Zero (a):", a, "| a1:", a1);
