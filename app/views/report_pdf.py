@@ -471,19 +471,23 @@ def report_pdf(request):
 
 
 
-
-
 def send_mail_with_pdf(pdf_content, recipient_email, pdf_filename):
     try:
         mail_settings = MailSettings.objects.get(id=1)
     except MailSettings.DoesNotExist:
-        print("Mail settings not configured.")
-        return
+        print("❌ Mail settings not configured.")
+        return False  # Return failure
 
     sender_email = mail_settings.sender_email
     sender_password = mail_settings.sender_password
     smtp_server = mail_settings.smtp_server
     smtp_port = mail_settings.smtp_port
+
+    # ✅ Check for any missing critical fields
+    if not all([sender_email, sender_password, smtp_server, smtp_port]):
+        print("❌ One or more required mail settings are missing.")
+        return False
+
     subject = "Report PDF"
     body = "Please find the attached PDF report."
 
@@ -505,7 +509,7 @@ def send_mail_with_pdf(pdf_content, recipient_email, pdf_filename):
             server.login(sender_email, sender_password)
             server.sendmail(sender_email, recipient_email, msg.as_string())
         print("✅ Email sent to:", recipient_email)
+        return True
     except Exception as e:
         print(f"❌ Error sending email: {e}")
-
-
+        return False

@@ -983,12 +983,20 @@ function getCSRFToken() {
 
 
 document.getElementById('enter_btn_main').addEventListener('click', function () {
+    const modal = document.getElementById("notificationModal_1");
+
+    // 🛑 Don't run if modal is active
+    if (modal.style.display === "flex") {
+        console.log("Modal is active. Ignoring Enter button click.");
+        document.getElementById("notificationOkBtn_1").focus();
+        return;
+        
+    }
+
     let punchTextarea = document.getElementById('punch_no');
 
-    // Focus the input first
     punchTextarea.focus();
 
-    // Trigger the Enter key on the input field
     let enterEvent = new KeyboardEvent('keydown', {
         key: 'Enter',
         code: 'Enter',
@@ -1636,10 +1644,18 @@ notificationBar.value = `DO MEASUREMENT FOR STEP ${currentStep} `;
 
 function handleIntervalAlerts(responseData, partModel) {
     const startDate = new Date(responseData.last_stored_dates);
-    const intervalSettings = JSON.parse(responseData.interval_settings_json);
+    let intervalSettings = JSON.parse(responseData.interval_settings_json) || [];
+
+    // ✅ Filter out intervals with 0 hours and 0 minutes
+    intervalSettings = intervalSettings.filter(setting => setting.hour !== 0 || setting.minute !== 0);
+    if (intervalSettings.length === 0) {
+        console.log("⏳ No valid interval settings found. Skipping alerts.");
+        return;
+        
+    }
+
     document.getElementById("notificationModal_1").style.display = "none";
 
-    // Clear any existing timers to prevent multiple alerts
     if (alertTimeoutId) {
         clearTimeout(alertTimeoutId);
         alertTimeoutId = null;
@@ -1649,7 +1665,7 @@ function handleIntervalAlerts(responseData, partModel) {
         alertIntervalId = null;
     }
 
-    activePartModel = partModel; // Set active model
+    activePartModel = partModel;
 
     intervalSettings.forEach(setting => {
         const hours = setting.hour;
@@ -1685,6 +1701,7 @@ function handleIntervalAlerts(responseData, partModel) {
         }
     });
 }
+
 
 
 
@@ -2087,18 +2104,28 @@ function collectFinalData() {
 }
 
 
-let allowFunctionKeys = false; // Block F4 and F5 initially
-    // Example flag – set this based on your app logic
+let allowFunctionKeys = false; // Initially block F4 and F5
 
-    // Main handler for F4 and F5 keys
-    function handleKeyPress(event) {
-        if (!allowFunctionKeys) return; // Ignore if not allowed yet
+function handleKeyPress(event) {
+    const punchOverlay = document.getElementById('punch_no_container');
 
-        if ((event.key === 'F4' && isStart) || (event.key === 'F5' && !isStart)) {
-            event.preventDefault();
-            handleAction();
-        }
+    // Block F4/F5 if function keys not allowed OR punch overlay is visible
+    if (
+        !allowFunctionKeys || 
+        (punchOverlay && punchOverlay.style.display === 'flex')
+    ) {
+        return;
     }
+
+    if ((event.key === 'F4' && isStart) || (event.key === 'F5' && !isStart)) {
+        event.preventDefault();
+        handleAction();
+    }
+}
+
+// Attach the listener
+document.addEventListener('keydown', handleKeyPress);
+
 
 
 // Update button text and ID

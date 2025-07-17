@@ -88,7 +88,7 @@ def generate_readings_table(subgroups, x_bars, ranges):
     }
 
     table.table {
-        font-size: 1.5vw;
+        font-size: 1.4vw;
         width: max-content; /* ensures horizontal scroll when needed */
         height: 100%;
         border-collapse: collapse;
@@ -96,7 +96,7 @@ def generate_readings_table(subgroups, x_bars, ranges):
 
     table.table th, table.table td {
         padding: 2px;
-        max-width: 130px;
+        max-width: 200px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
