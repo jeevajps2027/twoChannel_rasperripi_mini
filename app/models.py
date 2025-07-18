@@ -17,6 +17,7 @@ class paraTableData(models.Model):
     parameter_settings = models.ForeignKey(Parameter_Settings, related_name='table_data', on_delete=models.CASCADE)
     sr_no = models.CharField(max_length=10)
     parameter_name = models.CharField(max_length=100, blank=True)
+    fixed_channel = models.CharField(max_length=10, blank=True)
     channel_no = models.CharField(max_length=10, blank=True)
     single_double = models.BooleanField(default=False)
     low_master = models.CharField(max_length=100, blank=True)
@@ -59,6 +60,7 @@ class master_data(models.Model):
     date_time = models.DateTimeField()
     mastering = models.CharField(max_length=10)
     probe_number = models.IntegerField()  # Add probeNumber as a field
+    channel_fixed = models.IntegerField(default=0)
 
 
     def __str__(self):
@@ -211,3 +213,10 @@ class MasterInterval(models.Model):
 
     def __str__(self):
         return f"{self.hour:02d}:{self.minute:02d}"
+
+
+class TableClearFlag(models.Model):
+    clear_table = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"Clear Table: {self.clear_table}"

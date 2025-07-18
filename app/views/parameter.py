@@ -2,7 +2,7 @@ import json
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
-from app.models import MeasurementData, Parameter_Settings, master_data, paraTableData
+from app.models import MeasurementData, Parameter_Settings, master_data, paraTableData, part_retrived
 
 @csrf_exempt  # For development only; use CSRF protection in production
 def parameter(request):
@@ -66,6 +66,7 @@ def parameter(request):
                     if existing_row:
                         # If the row exists, update it
                         existing_row.parameter_name = parameter_name
+                        existing_row.fixed_channel = row.get('fixed_channel')
                         existing_row.channel_no = row.get('channel_no')
                         existing_row.single_double = single_double_value
                         existing_row.low_master = row.get('low_master')
@@ -88,6 +89,7 @@ def parameter(request):
                             parameter_settings=existing_part_model,
                             sr_no=sr_no,
                             parameter_name=parameter_name,
+                            fixed_channel = row.get('fixed_channel'),
                             single_double = single_double_value,
                             channel_no=row.get('channel_no'),
                             low_master=row.get('low_master'),
@@ -141,6 +143,7 @@ def parameter(request):
                         parameter_settings=parameter_settings,
                         sr_no=sr_no,
                         parameter_name=parameter_name,
+                        fixed_channel = row.get('fixed_channel'),
                         channel_no=row.get('channel_no'),
                         single_double = row.get('single_double',False),
                         low_master=row.get('low_master'),
@@ -176,6 +179,9 @@ def parameter(request):
             deleted_count, _ = Parameter_Settings.objects.filter(part_model=part_model).delete()
             delete_count1, _ = MeasurementData.objects.filter(part_model=part_model).delete()
             delete_count2, _ = master_data.objects.filter(part_model=part_model).delete()
+            delete_count3, _ = part_retrived.objects.filter(part_name=part_model).delete()
+
+
 
             if deleted_count > 0:
                 return JsonResponse({'message': f'Part Model "{part_model}" deleted successfully.'}, status=200)
@@ -201,6 +207,7 @@ def parameter(request):
                     {
                         "sr_no": row.sr_no,
                         "parameter_name": row.parameter_name,
+                        "fixed_channel" : row.fixed_channel,
                         "channel_no": row.channel_no,
                         "single_double": row.single_double,
                         "low_master": row.low_master,

@@ -30,7 +30,8 @@ def data(request):
                 part_model=item['part_model'],
                 date_time=date_time,
                 mastering=item['mastering'],
-                probe_number=item['probeNumber']
+                probe_number=item['probeNumber'],
+                channel_fixed = item['containerNumber'],
             )
 
         # Respond with success message

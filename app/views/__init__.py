@@ -21,3 +21,5 @@ from .keyboard import keyboard
 from .customer import customer
 from .shift_redirect import shift_redirect_status
 from .shift_redirect import save_shift_redirect
+from .set_clear_flag import set_clear_flag
+from .reset_clear_flag import reset_clear_flag

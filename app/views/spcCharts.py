@@ -28,7 +28,7 @@ def generate_r_chart(readings, sample_size):
     x_bar = [np.mean(group) for group in subgroups]
     r_values = [np.max(group) - np.min(group) for group in subgroups]
 
-    fig, axs = plt.subplots(2, 1, figsize=(17, 8), dpi=100)
+    fig, axs = plt.subplots(2, 1, figsize=(12, 6), dpi=100)
     fig.patch.set_facecolor('gray')  # Light gray background for full chart
 
     # Set background color for each subplot
@@ -77,7 +77,6 @@ def generate_readings_table(subgroups, x_bars, ranges):
     df.loc['X̄ (Mean)'] = x_bars[:max_columns]
     df.loc['R̄ (Range)'] = ranges[:max_columns]
 
-    
     style = """
     <style>
     .table-wrapper {
@@ -119,7 +118,7 @@ def generate_histogram(readings, usl=None, lsl=None):
     import numpy as np
     import matplotlib.pyplot as plt
 
-    fig, ax = plt.subplots(figsize=(17, 7), dpi=100)
+    fig, ax = plt.subplots(figsize=(12,6), dpi=100)
     
     # Optional background color
     fig.patch.set_facecolor('gray')
@@ -214,7 +213,7 @@ def generate_pie_chart(status, usl=None, lsl=None):
     pie_colors = [colors.get(key.lower(), '#808080') for key in status_counts.index]  # Default to gray
 
     # Create figure with increased size and background
-    fig, ax = plt.subplots(figsize=(14, 10), dpi=100)
+    fig, ax = plt.subplots(figsize=(12,6), dpi=100)
     fig.patch.set_facecolor('gray')  # Light background
 
     # Generate the pie chart with increased font sizes
@@ -283,7 +282,11 @@ def generate_pie_chart(status, usl=None, lsl=None):
 
     return chart_img, table_html
 
-
+def safe_float(val):
+    try:
+        return float(val)
+    except (TypeError, ValueError):
+        return None
 
 def spcCharts(request):
     if request.method == 'POST':
@@ -299,6 +302,9 @@ def spcCharts(request):
             to_date = data.get('to_date')
             shift = data.get('shift')
 
+
+            print("parameter_name kkkkkkkkkkkkkkkkkkkk",parameter_name)
+
             if not all([from_date, to_date, part_model]):
                 return JsonResponse({'error': 'Missing required fields: from_date, to_date, or part_model'}, status=400)
 
@@ -313,51 +319,69 @@ def spcCharts(request):
                 filter_kwargs['parameter_name'] = parameter_name
 
             filtered_data = MeasurementData.objects.filter(**filter_kwargs).order_by('date')
+            print("")
             filtered_list = filtered_data.values('output')
             filtered_result = filtered_data.values('overall_status')
 
             # Get USL and LSL if specific parameter is selected
             usl = None
             lsl = None
+            ltl = None
+            utl = None
 
             if parameter_name != "ALL":
                 try:
-                    # Find the matching Parameter_Settings instance
+                    # Get matching Parameter_Settings
                     setting = Parameter_Settings.objects.get(part_model=part_model)
-                    
-                    # Find the matching paraTableData
+
+                    # Get matching paraTableData
                     para_data = paraTableData.objects.get(
                         parameter_settings=setting,
                         parameter_name=parameter_name
                     )
-                    
-                    usl = para_data.usl
-                    lsl = para_data.lsl
-                    print("usl",usl)
-                    print("lsl",lsl)
+
+                    # Convert limits to float safely
+                    usl = safe_float(para_data.usl)
+                    lsl = safe_float(para_data.lsl)
+                    utl = safe_float(para_data.utl)
+                    ltl = safe_float(para_data.ltl)
+
+                    print("USL:", usl, "LSL:", lsl, "UTL:", utl, "LTL:", ltl)
 
                 except (Parameter_Settings.DoesNotExist, paraTableData.DoesNotExist):
-                    usl = None
-                    lsl = None
-                    print("USL/LSL not found for the given parameter.")
+                    usl = lsl = utl = ltl = None
+                    print("Thresholds not found for the given parameter.")
 
             if not filtered_list:
                 return JsonResponse({'error': 'No data found for the given criteria'}, status=404)
 
             # Extract readings
-            readings = [float(r['output']) for r in filtered_list]
-
-            # Handle `overall_status` values
-            status = []
-            for r in filtered_result:
+            readings = []
+            for r in filtered_list:
                 try:
-                    # Attempt to convert to float
-                    status.append(float(r['overall_status']))
-                except ValueError:
-                    # If conversion fails, append the original string
-                    status.append(r['overall_status'])
+                    readings.append(float(r['output']))
+                except (ValueError, TypeError):
+                    readings.append(None)
 
-            print("Status:", status)
+            # Evaluate status based on value_float and limits
+            status = []
+            for value_float in readings:
+                if value_float is None or None in (ltl, lsl, usl, utl):
+                    status.append("UNKNOWN")  # Missing value or thresholds
+                elif value_float < ltl:
+                    status.append("REJECT")
+                elif ltl <= value_float < lsl:
+                    status.append("REWORK")
+                elif lsl <= value_float <= usl:
+                    status.append("ACCEPT")
+                elif usl < value_float <= utl:
+                    status.append("REWORK")
+                elif value_float > utl:
+                    status.append("REJECT")
+                else:
+                    status.append("UNKNOWN")  # Fallback for edge cases
+
+            print("Evaluated Status:", status)
             print("Status Length:", len(status))
 
             # Generate the chart based on mode
@@ -386,28 +410,37 @@ def spcCharts(request):
     
 
     elif request.method == 'GET':
-
         part_model = request.GET.get('part_model', '')
-        # Process the part_model as needed
         print(f'Received part model: {part_model}')
 
-        parameter_setting = Parameter_Settings.objects.get(part_model=part_model)
+        try:
+            parameter_setting = Parameter_Settings.objects.get(part_model=part_model)
+            
             # Get all related paraTableData
-        parameter_names = list(paraTableData.objects.filter(parameter_settings=parameter_setting).values_list('parameter_name', flat=True).order_by('id'))
-        print("parameter_names",parameter_names)
+            parameter_names = list(
+                paraTableData.objects.filter(parameter_settings=parameter_setting)
+                .values_list('parameter_name', flat=True)
+                .order_by('id')
+            )
+            print("parameter_names", parameter_names)
 
-       
+            error_message = None  # No error
+
+        except Parameter_Settings.DoesNotExist:
+            # If not found, set empty parameter_names and an error message
+            print(f"No parameter settings found for part model: {part_model}")
+            parameter_names = []
+            error_message = f"No parameter settings found for part model: {part_model}"
+
+        # Common context logic (this runs regardless of try/except above)
         shift_values = Data_Shift.objects.order_by('id').values_list('shift', 'shift_time').distinct()
         shift_name_queryset = Data_Shift.objects.order_by('id').values_list('shift', flat=True).distinct()
         shift_name = list(shift_name_queryset)
-        print ("shift_name",shift_name)
+        print("shift_name", shift_name)
 
-        # Convert the QuerySet to a list of lists
         shift_values_list = list(shift_values)
-        
-        # Serialize the list to JSON
         shift_values_json = json.dumps(shift_values_list)
-        print("shift_values_json",shift_values_json)
+        print("shift_values_json", shift_values_json)
 
         customer = Customer.objects.first()
         primary_email = customer.primary_email if customer else ''
@@ -415,14 +448,14 @@ def spcCharts(request):
         print("Primary Email:", primary_email)
         print("Secondary Email:", secondary_email)
 
-
-         # Create a context dictionary to pass the data to the template
+        # Context to pass into the template
         context = {
             'shift_values': shift_values_json,
-            'shift_name':shift_name,
-            'parameter_names':parameter_names,
+            'shift_name': shift_name,
+            'parameter_names': parameter_names,
             'primary_email': primary_email,
             'secondary_email': secondary_email,
+            'error_message': error_message,
         }
 
-    return render(request,'app/spcCharts.html',context)
+        return render(request, 'app/spcCharts.html', context)

@@ -4,7 +4,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 import json
 from django.views.decorators.csrf import csrf_exempt
-from app.models import MasterInterval, MeasurementData, Parameter_Settings, ParameterFactor,part_retrived, ComportSetting, Data_Shift,User_Data, master_data, paraTableData
+from app.models import MasterInterval, MeasurementData, Parameter_Settings, ParameterFactor,part_retrived, ComportSetting, Data_Shift,User_Data, master_data, paraTableData,TableClearFlag
 import serial.tools.list_ports
 from collections import defaultdict
 from django.db.models import Count
@@ -20,6 +20,10 @@ def get_available_com_ports():
 def measurement(request):
 
     if request.method == 'POST':
+
+        part_name = "" 
+        last_stored_dates = []  # or None, or {}
+        interval_settings_json = "{}"
 
         part_model_get = request.POST.get('part_model', '')
         print("part_model_get:", part_model_get)
@@ -45,6 +49,7 @@ def measurement(request):
         # Extract and prepare data for response
         parameter_name_array = []
         channel_no_array = []
+        fixed_channel_array = []
         low_master_array = []
         high_master_array = []
         nominal_array = []
@@ -61,6 +66,7 @@ def measurement(request):
         for data in related_data:
             parameter_name_array.append(data.parameter_name)
             channel_no_array.append(data.channel_no)
+            fixed_channel_array.append(data.fixed_channel)
             low_master_array.append(data.low_master)
             high_master_array.append(data.high_master)
             nominal_array.append(data.nominal)
@@ -106,33 +112,56 @@ def measurement(request):
         existing_probe_nos = {entry['probe_number'] for entry in last_probes}
         missing_probe_nos = [p for p in probe_no if p not in existing_probe_nos]
 
-        # Fetch complete details of the last stored entry for each `probe_number`
-        last_probe_dict = {}
-        for entry in last_probes:
-            probe_number = entry['probe_number']
+       # Step 1: Get all fixed_channel values from paraTableData
+        fixed_channels = paraTableData.objects.filter(
+            parameter_settings__in=filtered_data
+        ).values_list('fixed_channel', flat=True).distinct().order_by('parameter_settings__id')
+
+        # Convert to integers (in case they're stored as strings)
+        fixed_channels = list(map(int, fixed_channels))
+        print('🔍 fixed_channels from paraTableData:', fixed_channels)
+
+        # Step 2: Get the latest master_data entries for each fixed_channel
+        last_fixed_data = (
+            master_data.objects.filter(part_model=part_model_get, channel_fixed__in=fixed_channels)
+            .values('channel_fixed')
+            .annotate(last_id=Max('id'))  # Get the latest ID for each fixed_channel
+        )
+
+        existing_fixed_channels = {entry['channel_fixed'] for entry in last_fixed_data}
+        missing_fixed_channels = [fc for fc in fixed_channels if fc not in existing_fixed_channels]
+
+        # Step 3: Fetch complete last record details per fixed_channel
+        last_fixed_dict = {}
+        for entry in last_fixed_data:
+            fixed_channel = entry['channel_fixed']
             last_id = entry['last_id']
-            
-            # Retrieve full record with this last_id
-            last_record = master_data.objects.filter(id=last_id).values('id', 'probe_number', 'e', 'd', 'o1','a1','b1','b').first()
-            
+
+            last_record = master_data.objects.filter(id=last_id).values(
+                'id', 'channel_fixed', 'e', 'd', 'o1', 'a1', 'b1', 'b', 'probe_number'
+            ).first()
+
             if last_record:
-                last_probe_dict[probe_number] = last_record
+                last_fixed_dict[fixed_channel] = last_record
 
-
-        # Format the data
+        # Step 4: Format output data
         parameter_values = [
             {
-                "probe_number": f"{probe_number}",
-                "id": values.get("id"),
-                "e": values.get("e"),
-                "d": values.get("d"),
-                "o1": values.get("o1"),
-                "a1": values.get("a1"),
-                "b1": values.get("b1"),
-                "b" : values.get("b"), 
+                "fixed_channel": str(fixed_channel),
+                "id": data.get("id"),
+                "e": data.get("e"),
+                "d": data.get("d"),
+                "o1": data.get("o1"),
+                "a1": data.get("a1"),
+                "b1": data.get("b1"),
+                "b": data.get("b"),
+                "probe_number": data.get("probe_number"),
             }
-            for probe_number, values in last_probe_dict.items()
+            for fixed_channel, data in last_fixed_dict.items()
         ]
+
+        print("✅ Final parameter_values (based on fixed_channel):", parameter_values)
+
 
          # Print values in the terminal
         for param in parameter_values:
@@ -209,12 +238,20 @@ def measurement(request):
            
             print("Hour:", setting.hour)
             print("Minute:", setting.minute)
+
+       
            
         # Convert the queryset to a list of dictionaries
         interval_settings_list = list(master_interval_settings.values())
 
         # Serialize the list to JSON
         interval_settings_json = json.dumps(interval_settings_list)
+
+        try:
+            flag = TableClearFlag.objects.get(id=1)
+            clear_flag_value = flag.clear_table
+        except TableClearFlag.DoesNotExist:
+            clear_flag_value = False  # fallback
 
 
 
@@ -244,9 +281,12 @@ def measurement(request):
              "measurement_data": measurement_values,
              "interval_settings_json":interval_settings_json,
              "last_stored_dates":last_stored_dates,
+             "fixed_channel_array":fixed_channel_array,
+             "clear_flag_value":clear_flag_value,
         })
     
     elif request.method == 'GET':
+        part_name = ""
         ports_string = ''
         comport_com_port = ComportSetting.objects.values_list('com_port', flat=True).first()
         comport_baud_rate = ComportSetting.objects.values_list('baud_rate', flat=True).first()

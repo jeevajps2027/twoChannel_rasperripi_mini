@@ -3,7 +3,7 @@ from django.urls import path,include
 from django.conf.urls.static import static
 from .views import measurement,master,parameter,spc,changed_name,report_xlsx,report_pdf,report,measurement_count,spc_download
 from .views import comport,login,data,measure_data,backup,delete_measure_data,spcCharts,get_parameters,get_parameter_value
-from .views import keyboard,customer,shift_redirect_status,save_shift_redirect
+from .views import keyboard,customer,shift_redirect_status,save_shift_redirect,set_clear_flag,reset_clear_flag
 
 urlpatterns = [
     path('',login,name="login"),
@@ -29,6 +29,9 @@ urlpatterns = [
     path('customer/',customer,name='customer'),
     path('shift_redirect_status/',shift_redirect_status,name='shift_redirect_status'),
     path('save_shift_redirect/',save_shift_redirect,name='save_shift_redirect'),
+    path("set-clear-flag/", set_clear_flag, name="set_clear_flag"),
+    path("reset-clear-flag/",reset_clear_flag, name="reset_clear_flag"),
+
     
     ]
 

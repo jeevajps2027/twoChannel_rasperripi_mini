@@ -96,6 +96,7 @@ def master(request):
                 if channel not in grouped_data:
                     grouped_data[channel] = {
                         "parameters": set(),
+                        "fixed_channel":set(),
                         "channel_no":set(),
                         "single_double":set(),
                         "low_master": set(),
@@ -114,6 +115,7 @@ def master(request):
                 grouped_data[channel]["parameters"].add(data.parameter_name)
                 grouped_data[channel]["low_master"].add(data.low_master)
                 grouped_data[channel]["high_master"].add(data.high_master)
+                grouped_data[channel]["fixed_channel"].add(data.fixed_channel)
                 grouped_data[channel]["channel_no"].add(data.channel_no)
                 grouped_data[channel]["single_double"].add(data.single_double)
                 grouped_data[channel]["nominal"].add(data.nominal)
@@ -135,6 +137,7 @@ def master(request):
             "low_master": [],
             "high_master": [],
             "nominal": [],
+            "fixed_channel":[],
             "channel_no":[],
              "single_double":[],
             "lsl": [],
@@ -150,6 +153,7 @@ def master(request):
         for channel, details in grouped_data.items():
             final_data["low_master"].extend(details["low_master"])
             final_data["high_master"].extend(details["high_master"])
+            final_data["fixed_channel"].extend(details["fixed_channel"])
             final_data["channel_no"].extend(details["channel_no"])
             final_data["single_double"].extend(details["single_double"])
             final_data["nominal"].extend(details["nominal"])

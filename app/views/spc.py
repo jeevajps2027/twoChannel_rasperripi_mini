@@ -236,16 +236,26 @@ def spc(request):
           
     elif request.method == 'GET':
         part_model = request.GET.get('part_model', '')
-        # Process the part_model as needed
         print(f'Received part model: {part_model}')
 
-        parameter_setting = Parameter_Settings.objects.get(part_model=part_model)
-            # Get all related paraTableData
-        parameter_names = list(paraTableData.objects.filter(parameter_settings=parameter_setting).values_list('parameter_name', flat=True).order_by('id'))
-        print("parameter_names",parameter_names)
+        try:
+            parameter_setting = Parameter_Settings.objects.get(part_model=part_model)
 
-        context ={
-            'parameter_names':parameter_names,
-        }
-        
-    return render(request,'app/spc.html',context)
+            # Get all related paraTableData
+            parameter_names = list(
+                paraTableData.objects.filter(parameter_settings=parameter_setting)
+                .values_list('parameter_name', flat=True)
+                .order_by('id')
+            )
+            print("parameter_names", parameter_names)
+
+            context = {
+                'parameter_names': parameter_names,
+            }
+            return render(request, 'app/spc.html', context)
+
+        except Parameter_Settings.DoesNotExist:
+            context = {
+                'error_message': f"No parameter settings found for part model: {part_model}"
+            }
+            return render(request, 'app/spc.html', context)
