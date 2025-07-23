@@ -254,7 +254,7 @@ def report_pdf(request):
 
         parameter_data = paraTableData.objects.filter(
             parameter_settings__part_model=part_model
-        ).values('parameter_name', 'usl', 'lsl').order_by('id')
+        ).values('parameter_name', 'usl', 'lsl','ltl','utl').order_by('id')
 
         for param in parameter_data:
             key = f"{param['parameter_name']} <br>{param['usl']} <br>{param['lsl']}"
@@ -280,6 +280,8 @@ def report_pdf(request):
                 param_name = param['parameter_name']
                 usl = param['usl']
                 lsl = param['lsl']
+                ltl = param['ltl']
+                utl = param['utl']
                 key = f"{param_name} <br>{usl} <br>{lsl}"
                 parameter_values = MeasurementData.objects.filter(
                     comp_sr_no=record.comp_sr_no,
@@ -288,38 +290,93 @@ def report_pdf(request):
                 )
 
                 for pv in parameter_values:
-                    value_to_display = getattr(pv, {
-                        'max': 'max_value',
-                        'min': 'min_value',
-                        'tir': 'tir_value',
-                        'readings': 'output'
-                    }.get(mode, 'output'))
+                        value = None
+                        if mode == 'max':
+                            value = pv.max_value
+                        elif mode == 'min':
+                            value = pv.min_value
+                        elif mode == 'tir':
+                            value = pv.tir_value
+                        elif mode == 'readings':
+                            value = pv.output
 
-                    if mode == 'readings':
-                        bg_color = {
-                            'ACCEPT': '#00ff00',
-                            'REWORK': 'yellow',
-                            'REJECT': 'red'
-                        }.get(pv.statusCell, 'white')
-                        value_to_display = f'<span style="background-color: {bg_color}; padding: 5px;">{value_to_display}</span>'
+                        value_to_display = value
 
-                    grouped_data[date]['Parameters'][key].add(str(value_to_display))
+                        
+                        # Range-based coloring for 'max' or 'min' mode
+                        if mode in ['max', 'min','readings'] and value is not None:
+                            try:
+                                value_float = float(value)
+                                ltl = float(ltl)
+                                lsl = float(lsl)
+                                usl = float(usl)
+                                utl = float(utl)
+
+                                if value_float < ltl:
+                                    bg_color = "red"
+                                elif ltl <= value_float < lsl:
+                                    bg_color = "yellow"
+                                elif lsl <= value_float <= usl:
+                                    bg_color = "#00ff00"
+                                elif usl < value_float <= utl:
+                                    bg_color = "yellow"
+                                elif value_float > utl:
+                                    bg_color = "red"
+                                else:
+                                    bg_color = "white"
+
+                                value_to_display = f'<span style="background-color: {bg_color}; padding: 5px; border-radius: 3px;">{value}</span>'
+                            except (ValueError, TypeError):
+                                value_to_display = f'<span>{value}</span>'
+
+                        grouped_data[date]['Parameters'][key].add(value_to_display)
 
         for date, group in grouped_data.items():
-            data_dict['Date'].append(date)
-            data_dict['Job Numbers'].append("<br>".join(sorted(group['Job Numbers'])))
-            data_dict['Shift'].append(group['Shift'])
-            data_dict['Operator'].append(group['Operator'])
+            job_numbers_combined = "<br>".join(sorted(group['Job Numbers']))
+            shift = group['Shift']
+            operator = group['Operator']
 
-            status_text = group['Status']
-            status_color = {
-                'ACCEPT': '#00ff00', 'REWORK': 'yellow', 'REJECT': 'red'
-            }.get(status_text, 'transparent')
-            status_display = f'<span style="background-color: {status_color}; padding: 5px;">{status_text}</span>'
+            # Only calculate status if mode is NOT 'tir'
+            if mode != 'tir':
+                status_final = 'ACCEPT'
+
+                for key, values in group['Parameters'].items():
+                    for val in values:
+                        if 'background-color: red' in val:
+                            status_final = 'REJECT'
+                            break
+                        elif 'background-color: yellow' in val:
+                            if status_final != 'REJECT':
+                                status_final = 'REWORK'
+                    if status_final == 'REJECT':
+                        break
+
+                # ✅ Apply status filter (only for non-'ALL')
+                if status != "ALL" and status != status_final:
+                    continue  # Skip this record if status doesn't match the filter
+
+                # Create status span
+                status_colors = {
+                    'ACCEPT': '#00ff00',
+                    'REWORK': 'yellow',
+                    'REJECT': 'red',
+                }
+                status_color = status_colors.get(status_final, 'transparent')
+                status_display = f'<span style="background-color: {status_color}; color: black; padding: 5px; border-radius: 3px;">{status_final}</span>'
+            else:
+                # If mode is 'tir', don't filter by status or display it
+                status_display = ''
+
+            # Append data (after status check)
+            data_dict['Date'].append(date)
+            data_dict['Job Numbers'].append(job_numbers_combined)
+            data_dict['Shift'].append(shift)
+            data_dict['Operator'].append(operator)
             data_dict['Status'].append(status_display)
 
             for key, values in group['Parameters'].items():
-                data_dict[key].append("<br>".join(sorted(values)))
+                data_dict[key].append("<br>".join(sorted(map(str, values))))
+
 
         df = pd.DataFrame(data_dict)
         df.index += 1
@@ -458,8 +515,12 @@ def report_pdf(request):
             try:
                 with open(file_path, 'rb') as f:
                     pdf_data = f.read()
-                send_mail_with_pdf(pdf_data, recipient_email, file_name)
-                return JsonResponse({'success': True, 'message': f'✅ PDF sent to {recipient_email} successfully.'})
+                success = send_mail_with_pdf(pdf_data, recipient_email, file_name)
+                if success:
+                    return JsonResponse({'success': True, 'message': f'✅ PDF sent to {recipient_email} successfully.'})
+                else:
+                    return JsonResponse({'success': False, 'message': '❌ Failed to send email. Please check mail settings or server connection.'})
+
             except Exception as e:
                 return JsonResponse({'success': False, 'message': f'❌ Failed to send PDF: {str(e)}'})
         else:

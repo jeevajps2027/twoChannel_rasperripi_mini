@@ -102,24 +102,14 @@ def report(request):
                             value = pv.min_value
                         elif mode == 'tir':
                             value = pv.tir_value
-                        else:
+                        elif mode == 'readings':
                             value = pv.output
 
                         value_to_display = value
 
-                        # Status-based color only for 'readings' mode
-                        if mode == 'readings':
-                            status_cell_value = pv.statusCell
-                            status_colors = {
-                                'ACCEPT': '#00ff00',
-                                'REWORK': 'yellow',
-                                'REJECT': 'red'
-                            }
-                            bg_color = status_colors.get(status_cell_value, 'white')
-                            value_to_display = f'<span style="background-color: {bg_color}; padding: 5px; border-radius: 3px;">{value}</span>'
-
+                        
                         # Range-based coloring for 'max' or 'min' mode
-                        elif mode in ['max', 'min'] and value is not None:
+                        if mode in ['max', 'min','readings'] and value is not None:
                             try:
                                 value_float = float(value)
                                 ltl = float(ltl)
@@ -145,6 +135,7 @@ def report(request):
                                 value_to_display = f'<span>{value}</span>'
 
                         grouped_data[date]['Parameters'][key].add(value_to_display)
+            
 
             for date, group in grouped_data.items():
                 data_dict['Date'].append(date)
@@ -153,15 +144,34 @@ def report(request):
                 data_dict['Shift'].append(group['Shift'])
                 data_dict['Operator'].append(group['Operator'])
 
-                status = group['Status']
-                status_colors = {
-                    'ACCEPT': '#00ff00',
-                    'REWORK': 'yellow',
-                    'REJECT': 'red',
-                }
-                status_color = status_colors.get(status, 'transparent')
-                status_display = f'<span style="background-color: {status_color}; color: black; padding: 5px; border-radius: 3px;">{status}</span>'
-                data_dict['Status'].append(status_display)
+                if mode in ['max', 'min', 'readings']:
+                    status_final = 'ACCEPT'
+
+                    for key, values in group['Parameters'].items():
+                        for val in values:
+                            if 'background-color: red' in val:
+                                status_final = 'REJECT'
+                                break
+                            elif 'background-color: yellow' in val:
+                                if status_final != 'REJECT':
+                                    status_final = 'REWORK'
+                        if status_final == 'REJECT':
+                            break
+
+                    status_colors = {
+                        'ACCEPT': '#00ff00',
+                        'REWORK': 'yellow',
+                        'REJECT': 'red',
+                    }
+                    status_color = status_colors.get(status_final, 'transparent')
+                    status_display = f'<span style="background-color: {status_color}; color: black; padding: 5px; border-radius: 3px;">{status_final}</span>'
+                    data_dict['Status'].append(status_display)
+
+                else:
+                    # Leave status blank for 'tir' mode
+                    data_dict['Status'].append('')
+
+
 
                 for key, values in group['Parameters'].items():
                     data_dict[key].append("<br>".join(sorted(map(str, values))))
