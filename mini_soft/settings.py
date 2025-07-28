@@ -117,18 +117,18 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
         
     },
-    'client_db': {  # Your client database CHECKDB becomes secondary
-        'ENGINE': 'mssql',
-        'NAME': 'CHECKDB',
-        'USER': 'sa',
-        'PASSWORD': 'sai@123',
-        'HOST': 'egServer73',  # IP of CHECKDB
-        'PORT': '1433',
-        'OPTIONS': {
-            'driver': 'FreeTDS',
-            'extra_params': 'TDS_Version=7.3',
-        },
-    },
+    # 'client_db': {  # Your client database CHECKDB becomes secondary
+    #     'ENGINE': 'mssql',
+    #     'NAME': 'CHECKDB',
+    #     'USER': 'sa',
+    #     'PASSWORD': 'sai@123',
+    #     'HOST': 'egServer73',  # IP of CHECKDB
+    #     'PORT': '1433',
+    #     'OPTIONS': {
+    #         'driver': 'FreeTDS',
+    #         'extra_params': 'TDS_Version=7.3',
+    #     },
+    # },
 }
 
 

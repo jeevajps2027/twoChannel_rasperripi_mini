@@ -160,19 +160,19 @@ class ParameterFactor(models.Model):
 
 
 
-class InterlinkData(models.Model):
-    status_cell = models.CharField(max_length=100)
-    date = models.DateTimeField()
-    operator = models.CharField(max_length=100)
-    part_model = models.CharField(max_length=100)
-    part_status = models.CharField(max_length=100)
-    comp_sr_no = models.CharField(max_length=100)
-    shift = models.CharField(max_length=100)
-    machine = models.CharField(max_length=100)
+# class InterlinkData(models.Model):
+#     status_cell = models.CharField(max_length=100)
+#     date = models.DateTimeField()
+#     operator = models.CharField(max_length=100)
+#     part_model = models.CharField(max_length=100)
+#     part_status = models.CharField(max_length=100)
+#     comp_sr_no = models.CharField(max_length=100)
+#     shift = models.CharField(max_length=100)
+#     machine = models.CharField(max_length=100)
 
-    class Meta:
-        managed = False   # 🚨 very important, Django will not try to create/migrate this table
-        db_table = 'app_interlinkdata'   # 🔥 your exact table name
+#     class Meta:
+#         managed = False   # 🚨 very important, Django will not try to create/migrate this table
+#         db_table = 'app_interlinkdata'   # 🔥 your exact table name
 
 
 class MailSettings(models.Model):
@@ -220,3 +220,9 @@ class TableClearFlag(models.Model):
 
     def __str__(self):
         return f"Clear Table: {self.clear_table}"
+
+class InterlinkData(models.Model):
+    Date_Time = models.DateTimeField() 
+    PartModel = models.CharField(max_length=50)
+    CompSrNo = models.CharField(max_length=150)
+    CompResultStatus = models.CharField(max_length=50)

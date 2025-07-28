@@ -2825,28 +2825,40 @@ parameterNames.forEach((name, index) => {
         }
     
         console.log("Data being sent to the backend:", dataToSend);
-    
-        // All rows valid, proceed to send
-        $.ajax({
-            url: '/measure_data/',
-            type: 'POST',
-            headers: { 'X-CSRFToken': getCSRFToken() },
-            data: JSON.stringify(dataToSend),
-            contentType: 'application/json',
-            success: function (response) {
-                $('#loading_spinner').hide();
-                console.log('Data successfully sent to the backend:', response);
-                showNotification('DATA SAVED', true);
-                setTimeout(() => {
-                    location.reload();
-                }, 1000);
-            },
-            error: function (error) {
-                console.error('Error sending data to the backend:', error);
-                showNotification('Error sending data to the backend.', false);
-                $('#loading_spinner').hide();
-            }
+
+        Promise.all([
+            $.ajax({
+                url: '/interlink/',
+                type: 'POST',
+                headers: { 'X-CSRFToken': getCSRFToken() },
+                data: JSON.stringify({
+                    date: date,
+                    punchNo: punchNo,
+                    partModel: partModel,
+                    overallStatusInput: overallStatusInput
+                }),
+                contentType: 'application/json'
+            }),
+            $.ajax({
+                url: '/measure_data/',
+                type: 'POST',
+                headers: { 'X-CSRFToken': getCSRFToken() },
+                data: JSON.stringify(dataToSend),
+                contentType: 'application/json'
+            })
+        ]).then(([interlinkResponse, measureDataResponse]) => {
+            $('#loading_spinner').hide();
+            console.log('Both data sent successfully');
+            showNotification('DATA SAVED', true);
+            setTimeout(() => {
+                location.reload();
+            }, 1000);
+        }).catch((error) => {
+            console.error('Error in sending one or both requests:', error);
+            showNotification('Error sending data.', false);
+            $('#loading_spinner').hide();
         });
+
     }
     
     
