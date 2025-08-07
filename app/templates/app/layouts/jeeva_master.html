@@ -986,398 +986,482 @@ input[type="radio"] {
         
         
         document.getElementById("lowMasterBtn").addEventListener("click", function () {
-            console.clear();
-            console.log("Low Mastering button clicked.");
-            if (parameterValues) {
-                console.log("parameterValues", parameterValues);
-                // You can now work with parameterValues here
-            } else {
-                console.warn("⚠️ parameterValues not loaded yet. Please fetch master data first.");
-            }
+    console.clear();
+    console.log("Low Mastering button clicked.");
 
-        
-            const masteringSelect = document.getElementById("mastering");
-            const selectedMasteringValue = masteringSelect.value;
-            masteringSelect.disabled = true;  // Prevents user from changing it
-        
-            const response = window.fetchedResponse;
-            if (!response) {
-                console.error("No data available. Please call 'fetchAndDisplayValues' first.");
-                return;
-            }
-        
-        
-            // let fetchedData = response.final_data;
-        
-            const lowmaster = response.final_data.low_master;  // Accessing correctly from final_data
-            const probe_number = response.final_data.channel_no;  // Correcting variable name
-            const step_no = response.final_data.master_grp; // Correcting variable name
-        
-            // Initialize arrays to store values
-            window.lowmasterValues = [];
-            window.lowmasterA1Values = [];
-        
-            // Check which main radio button is selected
-            const isAllParameterSelected = document.getElementById("all_parameter").checked;
-            const isParameterwiseSelected = document.getElementById("parameterwise").checked;
-        
-            if (isAllParameterSelected) {
-                console.log("All Parameters selected.");
-        
-                 // ✅ Make sure array exists
-            if (!window.overrideDisplay) {
-                window.overrideDisplay = [];
-            }
-                // Perform calculations for all parameters
-                lowmaster.forEach((lowValue, index) => {
-        
-                    console.log("jjjjjjjjjjjjjjjjjjjjjjjjjjjjjindex",index)
-                    if (step_no[index] == selectedMasteringValue) {
-            const a = parseFloat(lowValue) || 0;
-            const probeNumber = probe_number[index];
-            const textareaId = mapProbeToTextareaId(probeNumber);
-            const textarea = document.getElementById(textareaId);
-            const a1 = textarea ? parseFloat(textarea.value) || 0 : 0;
-            
-
-
-            // ✅ Match parameterValues entry by probe_number
-            const paramObj = parameterValues.find(obj => obj.probe_number == probeNumber);
-
-            if (!paramObj) {
-                console.warn(`⚠️ No parameterValues found for probe_number: ${probeNumber}`);
-                return;
-            }
-
-            // Extract required values from matched paramObj
-const b = parseFloat(paramObj.b);
-const b1 = parseFloat(paramObj.b1);
-const e = parseFloat(paramObj.e);
-const d = parseFloat(paramObj.d);
-const o1 = parseFloat(paramObj.o1);
-
-console.log("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",b,b1,e,d,o1)
-
-            // const containerNumber = parseInt(response.final_data.fixed_channel[index]);
-        
-            console.log(`Container ${index + 1}:`);
-            console.log("Low Master value (a):", a);
-            console.log("Textarea value (a1):", a1);
-        
-            window.lowmasterValues[index] = a;
-            window.lowmasterA1Values[index] = a1;
-        
-            const lowRawMasterInput = document.getElementById(`low_raw_count${index + 1}`);
-                if (lowRawMasterInput) {
-                    lowRawMasterInput.value = a1;
-                }
-            const outputInput = document.getElementById(`center_input${index + 1}`);
-            if (outputInput && textarea) {
-    // window.overrideDisplay[index] = true; // Pause live update
-
-    const c = b - a;
-    const c1 = b1 - a1 || 1;  // Avoid divide by zero
-    const d = c / c1;
-    const o = e + (a1 * d);
-    const o1 = a - o;
-
-    const newSerialData = parseFloat(textarea.value);
-    if (!isNaN(newSerialData)) {
-        const displayOutput = e + (newSerialData * d + o1);
-        outputInput.value = displayOutput.toFixed(4);  // You can use digits if available
-
-        // Color based on range (optional: add lsl/usl/ltl/utl if defined)
-        if (typeof lsl !== "undefined" && typeof usl !== "undefined" &&
-            typeof ltl !== "undefined" && typeof utl !== "undefined") {
-            const k = displayOutput;
-            if (k >= lsl && k <= usl) {
-                outputInput.style.backgroundColor = '#00ff00'; // Green
-            } else if ((k > usl && k <= utl) || (k >= ltl && k < lsl)) {
-                outputInput.style.backgroundColor = 'yellow';
-            } else if (k > utl || k < ltl) {
-                outputInput.style.backgroundColor = 'red';
-            }
-        } else {
-            outputInput.style.backgroundColor = "red";  // Default color
-        }
+    if (!parameterValues) {
+        console.warn("⚠️ parameterValues not loaded yet. Please fetch master data first.");
+        return;
     }
 
-    
-}
-        
-            const preInput = document.getElementById('pre');
-            preInput.value = "LOW MASTERING COMPLETED , DO HIGH MASTERING";
-        }
-        
-                });
-            } 
-            
-            
-            
-            
-            
-            else if (isParameterwiseSelected) {
-                console.clear()
-            console.log("Parameterwise selected.");
-        
-            const selectedContainer = Array.from(document.querySelectorAll(".selected_radio"))
-                .find(radio => radio.checked);
-        
-            if (!selectedContainer) {
-                showCustomAlert("PLEASE SELECT THE CHANNEL NO!.");
-                setTimeout(() => location.reload(), 2000);
-                return;
-            }
-        
-            const selectedContainerId = selectedContainer.id;
-            const selectedFixedChannel = parseInt(selectedContainerId.replace("selected_radio", ""));
-        
-            // ✅ Find the actual index in fixed_channel array
-            const actualIndex = response.final_data.fixed_channel.findIndex(fc => parseInt(fc) === selectedFixedChannel);
-        
-            if (actualIndex === -1) {
-                showCustomAlert("Selected container not found in data.");
-                return;
-            }
-        
-            const a = parseFloat(lowmaster[actualIndex]) || 0;
-            const step = step_no[actualIndex];
-            const probeNumber = probe_number[actualIndex];
-        
-            const textareaId = mapProbeToTextareaId(probeNumber);
-            const textarea = document.getElementById(textareaId);
-            const a1 = textarea ? parseFloat(textarea.value) || 0 : 0;
-        
-            console.log(`Fixed Channel ${selectedFixedChannel} → Index ${actualIndex}`);
-            console.log("Low Master value (a):", a);
-            console.log("Textarea value (a1):", a1);
-        
-            if (step == selectedMasteringValue) {
-                window.lowmasterValues[actualIndex] = a;
-                window.lowmasterA1Values[actualIndex] = a1;
-        
-                const lowRawMasterInput = document.getElementById(`low_raw_count${selectedFixedChannel}`);
+    console.log("parameterValues", parameterValues);
+
+    const masteringSelect = document.getElementById("mastering");
+    const selectedMasteringValue = masteringSelect.value;
+    masteringSelect.disabled = true;
+
+    const response = window.fetchedResponse;
+    if (!response) {
+        console.error("No data available. Please call 'fetchAndDisplayValues' first.");
+        return;
+    }
+
+    const lowmaster = response.final_data.low_master;
+    const probe_number = response.final_data.channel_no;
+    const step_no = response.final_data.master_grp;
+
+    // ✅ DEFINE LIMIT ARRAYS
+    const lsl = response.final_data.lsl;
+    const usl = response.final_data.usl;
+    const ltl = response.final_data.ltl;
+    const utl = response.final_data.utl;
+
+    window.lowmasterValues = [];
+    window.lowmasterA1Values = [];
+    if (!window.overrideDisplay) window.overrideDisplay = [];
+    if (!window.lowMasterParams) window.lowMasterParams = {};
+
+    const isAllParameterSelected = document.getElementById("all_parameter").checked;
+    const isParameterwiseSelected = document.getElementById("parameterwise").checked;
+
+    if (isAllParameterSelected) {
+        console.log("All Parameters selected.");
+
+        lowmaster.forEach((lowValue, index) => {
+            if (step_no[index] == selectedMasteringValue) {
+                const a = parseFloat(lowValue) || 0;
+                const probeNumber = probe_number[index];
+                const textareaId = mapProbeToTextareaId(probeNumber);
+                const textarea = document.getElementById(textareaId);
+                const a1 = textarea ? parseFloat(textarea.value) || 0 : 0;
+
+                const paramObj = parameterValues.find(obj => obj.probe_number == probeNumber);
+                if (!paramObj) {
+                    console.warn(`⚠️ No parameterValues found for probe_number: ${probeNumber}`);
+                    return;
+                }
+
+                const b = parseFloat(paramObj.b);
+                const b1 = parseFloat(paramObj.b1);
+                const e = parseFloat(paramObj.e);
+                const d = parseFloat(paramObj.d);
+                const o1 = parseFloat(paramObj.o1);
+
+                console.log(`Container ${index + 1}:`);
+                console.log("Low Master value (a):", a);
+                console.log("Textarea value (a1):", a1);
+
+                window.lowmasterValues[index] = a;
+                window.lowmasterA1Values[index] = a1;
+
+                const lowRawMasterInput = document.getElementById(`low_raw_count${index + 1}`);
                 if (lowRawMasterInput) {
                     lowRawMasterInput.value = a1;
                 }
-        
-                const outputInput = document.getElementById(`center_input${selectedFixedChannel}`);
-                if (outputInput) {
-                    window.overrideDisplay[actualIndex] = true;
-        
-                    const fixedA = parseFloat(a).toFixed(4);
-                    outputInput.value = fixedA;
-                    outputInput.style.backgroundColor = "red";
-        
-                    setTimeout(() => {
-                        window.overrideDisplay[actualIndex] = false;
-                    }, 3000);
+
+                const outputInput = document.getElementById(`center_input${index + 1}`);
+                if (outputInput && textarea) {
+                    window.overrideDisplay[index] = true;
+
+                    const c = b - a;
+                    const c1 = b1 - a1 || 1; // avoid divide by zero
+                    const dVal = c / c1;
+                    const oVal = e + (a1 * dVal);
+                    const o1Val = a - oVal;
+
+                    const newSerialData = parseFloat(textarea.value);
+                    if (!isNaN(newSerialData)) {
+                        const displayOutput = e + (newSerialData * dVal + o1Val);
+                        outputInput.value = displayOutput.toFixed(4);
+
+                        if (typeof lsl !== "undefined" && typeof usl !== "undefined" &&
+                            typeof ltl !== "undefined" && typeof utl !== "undefined") {
+                            const k = displayOutput;
+                            if (k >= lsl && k <= usl) {
+                                outputInput.style.backgroundColor = '#00ff00';
+                            } else if ((k > usl && k <= utl) || (k >= ltl && k < lsl)) {
+                                outputInput.style.backgroundColor = 'yellow';
+                            } else if (k > utl || k < ltl) {
+                                outputInput.style.backgroundColor = 'red';
+                            }
+                        } else {
+                            outputInput.style.backgroundColor = "red";
+                        }
+                    }
+
+                    // ✅ Define the handler function to store and remove later
+                    const inputHandler = function () {
+                        const serialValue = parseFloat(this.value);
+                        const params = window.lowMasterParams[index];
+                        if (!params || isNaN(serialValue)) return;
+
+                        const { d, o1, e, outputInput } = params;
+                        const displayOutput = e + (serialValue * d + o1);
+                        outputInput.value = displayOutput.toFixed(4);
+
+                        if (typeof lsl !== "undefined" && typeof usl !== "undefined" &&
+                            typeof ltl !== "undefined" && typeof utl !== "undefined") {
+                            const k = displayOutput;
+                            if (k >= lsl && k <= usl) {
+                                outputInput.style.backgroundColor = '#00ff00';
+                            } else if ((k > usl && k <= utl) || (k >= ltl && k < lsl)) {
+                                outputInput.style.backgroundColor = 'yellow';
+                            } else if (k > utl || k < ltl) {
+                                outputInput.style.backgroundColor = 'red';
+                            }
+                        } else {
+                            outputInput.style.backgroundColor = "red";
+                        }
+                    };
+
+                    // ✅ Store params with handler and textarea for cleanup
+                    window.lowMasterParams[index] = {
+                        d: dVal,
+                        o1: o1Val,
+                        e: e,
+                        outputInput: outputInput,
+                        handler: inputHandler,
+                        textarea: textarea
+                    };
+
+                    textarea.addEventListener("input", inputHandler);
                 }
-        
+
                 const preInput = document.getElementById('pre');
                 if (preInput) {
-                    preInput.value = "LOW MASTERING COMPLETED, DO HIGH MASTERING";
+                    preInput.value = "LOW MASTERING COMPLETED , DO HIGH MASTERING";
                 }
-        
-            } else {
-                showCustomAlert("The selected channel does not match the mastering group.");
-                setTimeout(() => location.reload(), 3000);
             }
+        });
+    }
+
+   
+            
+            
+            
+    else if (isParameterwiseSelected) {
+    console.clear();
+    console.log("Parameterwise selected.");
+
+    const selectedContainer = Array.from(document.querySelectorAll(".selected_radio"))
+        .find(radio => radio.checked);
+
+    if (!selectedContainer) {
+        showCustomAlert("PLEASE SELECT THE CHANNEL NO!.");
+        setTimeout(() => location.reload(), 2000);
+        return;
+    }
+
+    const selectedContainerId = selectedContainer.id;
+    const selectedFixedChannel = parseInt(selectedContainerId.replace("selected_radio", ""));
+
+    // ✅ Use actual index into arrays
+    const actualIndex = response.final_data.fixed_channel.findIndex(fc => parseInt(fc) === selectedFixedChannel);
+
+    if (actualIndex === -1) {
+        showCustomAlert("Selected container not found in data.");
+        return;
+    }
+
+    const a = parseFloat(lowmaster[actualIndex]) || 0;
+    const step = step_no[actualIndex];
+    const probeNumber = probe_number[actualIndex];
+    const textareaId = mapProbeToTextareaId(probeNumber);
+    const textarea = document.getElementById(textareaId);
+    const a1 = textarea ? parseFloat(textarea.value) || 0 : 0;
+
+    const paramObj = parameterValues.find(obj => obj.probe_number == probeNumber);
+    if (!paramObj) {
+        console.warn(`⚠️ No parameterValues found for probe_number: ${probeNumber}`);
+        return;
+    }
+
+    const b = parseFloat(paramObj.b);
+    const b1 = parseFloat(paramObj.b1);
+    const e = parseFloat(paramObj.e);
+    const d = parseFloat(paramObj.d);
+
+    console.log(`Fixed Channel ${selectedFixedChannel} → Index ${actualIndex}`);
+    console.log("Low Master value (a):", a);
+    console.log("Textarea value (a1):", a1);
+
+    if (step == selectedMasteringValue) {
+        window.lowmasterValues[actualIndex] = a;
+        window.lowmasterA1Values[actualIndex] = a1;
+
+        const lowRawMasterInput = document.getElementById(`low_raw_count${selectedFixedChannel}`);
+        if (lowRawMasterInput) {
+            lowRawMasterInput.value = a1;
         }
-        
+
+        const outputInput = document.getElementById(`center_input${selectedFixedChannel}`);
+        if (outputInput && textarea) {
+            window.overrideDisplay[actualIndex] = true;
+
+            const c = b - a;
+            const c1 = b1 - a1 || 1;
+            const dVal = c / c1;
+            const oVal = e + (a1 * dVal);
+            const o1Val = a - oVal;
+
+            const newSerialData = parseFloat(textarea.value);
+            if (!isNaN(newSerialData)) {
+                const displayOutput = e + (newSerialData * dVal + o1Val);
+                outputInput.value = displayOutput.toFixed(4);
+
+                const k = displayOutput;
+                if (k >= lsl[actualIndex] && k <= usl[actualIndex]) {
+                    outputInput.style.backgroundColor = '#00ff00';
+                } else if ((k > usl[actualIndex] && k <= utl[actualIndex]) || (k >= ltl[actualIndex] && k < lsl[actualIndex])) {
+                    outputInput.style.backgroundColor = 'yellow';
+                } else {
+                    outputInput.style.backgroundColor = 'red';
+                }
+            }
+
+            const inputHandler = function () {
+                const serialValue = parseFloat(this.value);
+                const params = window.lowMasterParams[actualIndex];
+                if (!params || isNaN(serialValue)) return;
+
+                const { d, o1, e, outputInput } = params;
+                const displayOutput = e + (serialValue * d + o1);
+                outputInput.value = displayOutput.toFixed(4);
+
+                const k = displayOutput;
+                if (k >= lsl[actualIndex] && k <= usl[actualIndex]) {
+                    outputInput.style.backgroundColor = '#00ff00';
+                } else if ((k > usl[actualIndex] && k <= utl[actualIndex]) || (k >= ltl[actualIndex] && k < lsl[actualIndex])) {
+                    outputInput.style.backgroundColor = 'yellow';
+                } else {
+                    outputInput.style.backgroundColor = 'red';
+                }
+            };
+
+            window.lowMasterParams[actualIndex] = {
+                d: dVal,
+                o1: o1Val,
+                e: e,
+                outputInput: outputInput,
+                handler: inputHandler,
+                textarea: textarea
+            };
+
+            textarea.addEventListener("input", inputHandler);
+        }
+
+        const preInput = document.getElementById('pre');
+        if (preInput) {
+            preInput.value = "LOW MASTERING COMPLETED, DO HIGH MASTERING";
+        }
+
+    } else {
+        showCustomAlert("The selected channel does not match the mastering group.");
+        setTimeout(() => location.reload(), 3000);
+    }
+}
+
         
         });
+
+
+
+
+        
         
         // ✅ UPDATED FULL HIGH MASTERING BUTTON HANDLER WITH CORRECT CONTAINER MAPPING
         
         document.getElementById("highMasterBtn").addEventListener("click", function () {
-            console.log("High Mastering button clicked.");
-        
-            const masteringSelect = document.getElementById("mastering");
-            const selectedMasteringValue = masteringSelect.value;
-            masteringSelect.disabled = false;
-        
-            const response = window.fetchedResponse;
-            if (!response) {
-                console.error("No data available. Please call 'fetchAndDisplayValues' first.");
-                return;
+    console.log("High Mastering button clicked.");
+
+    // 🧹 Clear low mastering handlers
+    if (window.lowMasterParams) {
+        Object.values(window.lowMasterParams).forEach(param => {
+            if (param.textarea && param.handler) {
+                param.textarea.removeEventListener("input", param.handler);
             }
-        
-            const highmaster = response.final_data.high_master;
-            const lowmaster = response.final_data.low_master;
-            const probe_number = response.final_data.channel_no;
-            const nominals = response.final_data.nominal;
-            const step_no = response.final_data.master_grp;
-            const lsl = response.final_data.lsl;
-            const usl = response.final_data.usl;
-            const ltl = response.final_data.ltl;
-            const utl = response.final_data.utl;
-            const id_od = response.final_data.id_od;
-            const digits = response.final_data.digits;
-            const fixed_channel = response.final_data.fixed_channel;
-        
-            const isAllParameterSelected = document.getElementById("all_parameter").checked;
-            const isParameterwiseSelected = document.getElementById("parameterwise").checked;
-        
-        
-            if (isAllParameterSelected) {
-                console.log("All Parameters selected.");
-        
-                let allPassed = true;
-                const validIndices = [];
-        
-                highmaster.forEach((highValue, index) => {
-                    if (step_no[index] == selectedMasteringValue) {
-                        const b = parseFloat(highValue) || 0;
-                        const a = parseFloat(lowmaster[index]) || 0;
-        
-                        const probeNumber = probe_number[index];
-                        const textareaId = mapProbeToTextareaId(probeNumber);
-                        const textarea = document.getElementById(textareaId);
-                        const b1 = textarea ? parseFloat(textarea.value) || 0 : 0;
-                        const a1 = window.lowmasterA1Values[index] || 0;
-        
-                        const jobDia = id_od[index];
-                        const difference = Math.abs(a1 - b1);
-        
-                        if ((jobDia === "OD" && (b1 <= a1 || difference < 1000)) ||
-                            (jobDia === "ID" && (b1 >= a1 || difference < 1000))) {
-                            showCustomAlert(`DO PROPER MASTERING`);
-                            const preInput = document.getElementById('pre');
-                            preInput.value = "DO MASTERING ";
-                            allPassed = false;
-                        } else {
-                            validIndices.push(index);
-                        }
-                    }
-                });
-        
-                if (!allPassed) return;
-        
-                validIndices.forEach(index => {
-                    const a = parseFloat(lowmaster[index]) || 0;
-                    const b = parseFloat(highmaster[index]) || 0;
-                    const a1 = window.lowmasterA1Values[index] || 0;
-                    const probeNumber = probe_number[index];
-                    const b1 = (() => {
-                        const textareaId = mapProbeToTextareaId(probeNumber);
-                        const textarea = document.getElementById(textareaId);
-                        return textarea ? parseFloat(textarea.value) || 0 : 0;
-                    })();
-        
-                    const containerNumber = parseInt(fixed_channel[index]);
-                    const textareaId = mapProbeToTextareaId(probeNumber);
-        
-                    performCalculations(
-                        a,
-                        a1,
-                        b,
-                        b1,
-                        nominals[index],
-                        index,
-                        containerNumber,
-                        textareaId,
-                        lsl[index],
-                        usl[index],
-                        ltl[index],
-                        utl[index],
-                        step_no[index],
-                        digits
-                    );
-        
-                    const highRawMasterInput = document.getElementById(`high_raw_count${containerNumber}`);
-                    if (highRawMasterInput) {
-                        highRawMasterInput.value = b1;
-                    }
-        
-                    const outputInput = document.getElementById(`center_input${containerNumber}`);
-                    if (outputInput) {
-                        outputInput.value = "";
-                        outputInput.style.backgroundColor = "";
-                    }
-        
-                    const preInput = document.getElementById('pre');
-                    preInput.value = "HIGH MASTERING COMPLETED ";
-                });
-            }
-        
-            else if (isParameterwiseSelected) {
-            console.log("Parameterwise selected.");
-        
-            const selectedContainer = Array.from(document.querySelectorAll(".selected_radio"))
-                .find(radio => radio.checked);
-        
-            if (!selectedContainer) {
-                showCustomAlert("PLEASE SELECT THE CHANNEL NO!.");
-                setTimeout(() => location.reload(), 2000);
-                return;
-            }
-        
-            // Extract fixed_channel number (e.g., from selected_radio2 → 2)
-            const selectedFixedChannel = parseInt(selectedContainer.id.replace("selected_radio", ""));
-        
-            // Find the actual index in the fixed_channel array
-            const actualIndex = fixed_channel.findIndex(fc => parseInt(fc) === selectedFixedChannel);
-        
-            if (actualIndex === -1) {
-                showCustomAlert("Selected container not found in data.");
-                return;
-            }
-        
-            if (step_no[actualIndex] == selectedMasteringValue) {
-                const a = window.lowmasterValues[actualIndex] || 0;
-                const a1 = window.lowmasterA1Values[actualIndex] || 0;
-        
-                const b = parseFloat(highmaster[actualIndex]) || 0;
-        
-                const probeNumber = probe_number[actualIndex];
+        });
+        window.lowMasterParams = {};
+    }
+
+    const masteringSelect = document.getElementById("mastering");
+    const selectedMasteringValue = masteringSelect.value;
+    masteringSelect.disabled = false;
+
+    const response = window.fetchedResponse;
+    if (!response) {
+        console.error("No data available. Please call 'fetchAndDisplayValues' first.");
+        return;
+    }
+
+    const {
+        high_master,
+        low_master,
+        channel_no,
+        nominal,
+        master_grp,
+        lsl,
+        usl,
+        ltl,
+        utl,
+        id_od,
+        digits,
+        fixed_channel,
+        step_no
+    } = response.final_data;
+
+    const isAllParameterSelected = document.getElementById("all_parameter").checked;
+    const isParameterwiseSelected = document.getElementById("parameterwise").checked;
+
+    if (isAllParameterSelected) {
+        console.log("All Parameters selected.");
+
+        let allPassed = true;
+        const validIndices = [];
+
+        high_master.forEach((highValue, index) => {
+            if (master_grp[index] == selectedMasteringValue) {
+                const b = parseFloat(highValue) || 0;
+                const a = parseFloat(low_master[index]) || 0;
+
+                const probeNumber = channel_no[index];
                 const textareaId = mapProbeToTextareaId(probeNumber);
                 const textarea = document.getElementById(textareaId);
                 const b1 = textarea ? parseFloat(textarea.value) || 0 : 0;
-        
-                const jobDia = id_od[actualIndex];
+                const a1 = window.lowmasterA1Values[index] || 0;
+
+                const jobDia = id_od[index];
                 const difference = Math.abs(a1 - b1);
-        
-                if (
-                    (jobDia === "OD" && (b1 <= a1 || difference < 1000)) ||
-                    (jobDia === "ID" && (b1 >= a1 || difference < 1000))
-                ) {
-                    showCustomAlert("DO PROPER MASTERING");
+
+                if ((jobDia === "OD" && (b1 <= a1 || difference < 1000)) ||
+                    (jobDia === "ID" && (b1 >= a1 || difference < 1000))) {
+                    showCustomAlert(`DO PROPER MASTERING`);
                     const preInput = document.getElementById('pre');
-                    if (preInput) preInput.value = "DO MASTERING ";
-                    return;
+                    preInput.value = "DO MASTERING ";
+                    allPassed = false;
+                } else {
+                    validIndices.push(index);
                 }
-        
-                // ✅ Proceed with calculations
-                performCalculations(
-                    a,
-                    a1,
-                    b,
-                    b1,
-                    nominals[actualIndex],
-                    actualIndex,
-                    selectedFixedChannel,
-                    textareaId,
-                    lsl[actualIndex],
-                    usl[actualIndex],
-                    ltl[actualIndex],
-                    utl[actualIndex],
-                    step_no[actualIndex],
-                    digits
-                );
-        
-                const highRawMasterInput = document.getElementById(`high_raw_count${selectedFixedChannel}`);
-                if (highRawMasterInput) {
-                    highRawMasterInput.value = b1;
-                }
-        
-                const preInput = document.getElementById('pre');
-                if (preInput) preInput.value = "HIGH MASTERING COMPLETED ";
-            } else {
-                showCustomAlert("The selected container does not match the mastering group.");
             }
+        });
+
+        if (!allPassed) return;
+
+        // ✅ Final display calculation for each valid index
+        validIndices.forEach(index => {
+            const a = parseFloat(low_master[index]) || 0;
+            const b = parseFloat(high_master[index]) || 0;
+            const a1 = window.lowmasterA1Values[index] || 0;
+
+            const probeNumber = channel_no[index];
+            const textareaId = mapProbeToTextareaId(probeNumber);
+            const textarea = document.getElementById(textareaId);
+            const b1 = textarea ? parseFloat(textarea.value) || 0 : 0;
+
+            const containerNumber = parseInt(fixed_channel[index]);
+
+            // 🔁 CALL performCalculations
+            performCalculations(
+                a,
+                a1,
+                b,
+                b1,
+                nominal[index],
+                index,
+                containerNumber,
+                textareaId,
+                lsl[index],
+                usl[index],
+                ltl[index],
+                utl[index],
+                step_no[index],
+                digits
+            );
+
+            // Optional raw master display
+            const highRawMasterInput = document.getElementById(`high_raw_count${containerNumber}`);
+            if (highRawMasterInput) {
+                highRawMasterInput.value = b1;
+            }
+
+            const preInput = document.getElementById('pre');
+            if (preInput) preInput.value = "HIGH MASTERING COMPLETED";
+        });
+    }
+
+
+    else if (isParameterwiseSelected) {
+    console.log("Parameterwise selected.");
+
+    const selectedContainer = Array.from(document.querySelectorAll(".selected_radio"))
+        .find(radio => radio.checked);
+
+    if (!selectedContainer) {
+        showCustomAlert("PLEASE SELECT THE CHANNEL NO!.");
+        setTimeout(() => location.reload(), 2000);
+        return;
+    }
+
+    const selectedFixedChannel = parseInt(selectedContainer.id.replace("selected_radio", ""));
+    const actualIndex = fixed_channel.findIndex(fc => parseInt(fc) === selectedFixedChannel);
+
+    if (actualIndex === -1) {
+        showCustomAlert("Selected container not found in data.");
+        return;
+    }
+
+    if (step_no[actualIndex] == selectedMasteringValue) {
+        const a = parseFloat(low_master[actualIndex]) || 0;
+        const a1 = window.lowmasterA1Values[actualIndex] || 0;
+        const b = parseFloat(high_master[actualIndex]) || 0;
+
+        const probeNumber = channel_no[actualIndex];
+        const textareaId = mapProbeToTextareaId(probeNumber);
+        const textarea = document.getElementById(textareaId);
+        const b1 = textarea ? parseFloat(textarea.value) || 0 : 0;
+
+        const jobDia = id_od[actualIndex];
+        const difference = Math.abs(a1 - b1);
+
+        if (
+            (jobDia === "OD" && (b1 <= a1 || difference < 1000)) ||
+            (jobDia === "ID" && (b1 >= a1 || difference < 1000))
+        ) {
+            showCustomAlert("DO PROPER MASTERING");
+            const preInput = document.getElementById('pre');
+            if (preInput) preInput.value = "DO MASTERING ";
+            return;
         }
-        
+
+        performCalculations(
+            a,
+            a1,
+            b,
+            b1,
+            nominal[actualIndex],
+            actualIndex,
+            selectedFixedChannel,
+            textareaId,
+            lsl[actualIndex],
+            usl[actualIndex],
+            ltl[actualIndex],
+            utl[actualIndex],
+            step_no[actualIndex],
+            digits
+        );
+
+        const highRawMasterInput = document.getElementById(`high_raw_count${selectedFixedChannel}`);
+        if (highRawMasterInput) {
+            highRawMasterInput.value = b1;
+        }
+
+        const preInput = document.getElementById('pre');
+        if (preInput) preInput.value = "HIGH MASTERING COMPLETED ";
+    } else {
+        showCustomAlert("The selected container does not match the mastering group.");
+    }
+}
+
         
         });
         
@@ -1799,9 +1883,12 @@ console.log("kkkkkkkkkkkkkkkkkkkkkkkkkkkkkk",b,b1,e,d,o1)
                 }
         
                 // Optional: call this immediately if needed
-                updateDisplayOutput();
+                
+                // updateDisplayOutput();
         
                 textarea.addEventListener('input', updateDisplayOutput);
+                 // 👇 Ensure update runs after textarea.value is correct
+    setTimeout(updateDisplayOutput, 100);
             }
         
             // Send payload to backend
