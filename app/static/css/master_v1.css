@@ -19,7 +19,7 @@ body {
 .container_1_1 {
     height:25%;
     width: 100%;
-    background-color: lightgray;
+    background-color: black;
     border: 1px solid black;
     margin: 0;
     padding: 0;
@@ -83,7 +83,7 @@ body {
 .container_2 {
     height:50%;
     width: 100%;
-    background-color: lightblue;
+    background-color: gray;
     border: 1px solid black;
     display: flex;
 } 
@@ -92,7 +92,7 @@ body {
     height: 100%;
     width: 25%;
     border: 1px solid black;
-    background-color: lightblue;
+    background-color: gray;
     display: flex;
     flex-direction: column; /* Stack canvas and input vertically */
     align-items: center;   /* Center horizontally */
@@ -197,7 +197,7 @@ input[type="radio"] {
 #pre{
     height: 90%;
     width: 100%;
-    background-color: yellow;
+    background-color: rgb(252, 252, 6);
     text-align: center;
     font-weight: bold;
     font-size: 2vw; 
@@ -338,12 +338,13 @@ input[type="radio"] {
     width: 100%;
     display: flex;
     border: 1px solid black;
+    background-color: lightgray;
 }
 .container_5_1{
     height: 100%;
     width: 100%;
     border: 1px solid black;
-    background-color: beige;
+    background-color: lightgray;
 }
 #measureBtn {
     height: 60%;

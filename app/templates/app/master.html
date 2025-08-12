@@ -12,7 +12,7 @@
     <title>MASTERING</title>
 
  
-    <link rel="stylesheet" href="{% static 'css/master_v.css'%}">
+    <link rel="stylesheet" href="{% static 'css/master_v1.css'%}">
   
 </head>
 
@@ -48,7 +48,7 @@
     width: 100%;
     display: flex;
     border: 1px solid black;
-    background-color: bisque;
+    background-color: lightgray;
 }
 
 
@@ -103,7 +103,7 @@ input[type="radio"] {
     align-items: center;
     justify-content: center;
     border: 1px solid black;
-    background-color: rgb(228, 194, 244);
+    background-color:gray;
     padding: 1px;
     box-sizing: border-box;
     width: 95%;
@@ -412,7 +412,7 @@ input[type="radio"] {
 
 
     <div class="container-5">
-        <div class="probe-container" >
+        <div class="probe-container" style="display: none;">
             <p>P1:</p><textarea id="probe-A"></textarea>
             <p>P2:</p><textarea id="probe-B"></textarea>
             <p>P3:</p><textarea id="probe-C"></textarea>
@@ -603,7 +603,7 @@ input[type="radio"] {
                     // Highlight the container of the selected radio button
                     const container = this.closest('.sub_container_4');
                     if (container) {
-                        container.style.backgroundColor = "orange";
+                        container.style.backgroundColor = "#1976D2";
                         console.log(`🎯 Container ID: ${container.id} highlighted`);
                     }
         
@@ -864,7 +864,7 @@ input[type="radio"] {
         
             if (container) {
                 container.style.filter = "none";
-                container.style.backgroundColor = isSelectedGroup ? "orange" : "";
+                container.style.backgroundColor = isSelectedGroup ? "#1976D2" : "";
             }
         
             if (inputBox) {
@@ -939,7 +939,7 @@ input[type="radio"] {
                     const parameterwiseRadio = document.getElementById("parameterwise");
         
                     if (parameterwiseRadio && parameterwiseRadio.checked) {
-                        // Clear all orange backgrounds
+                        // Clear all #1976D2 backgrounds
                         document.querySelectorAll(".sub_container_4").forEach(container => {
                             container.style.backgroundColor = "";
                         });
@@ -953,7 +953,7 @@ input[type="radio"] {
                                 const index = match[1];
                                 const container = document.getElementById(`cal_container${index}`);
                                 if (container) {
-                                    container.style.backgroundColor = "orange";
+                                    container.style.backgroundColor = "#1976D2";
                                 }
                             }
                         }
@@ -977,7 +977,7 @@ input[type="radio"] {
         
                 container.style.backgroundColor =
                     i <= masterGroups.length && masterGroups[i - 1] == selectedGroup
-                        ? "orange"
+                        ? "#1976D2"
                         : "";
             }
         }
@@ -1127,7 +1127,7 @@ setTimeout(() => {
                 const targetContainerId = `cal_container${match[1]}`;
                 const container = document.getElementById(targetContainerId);
                 if (container) {
-                    container.style.backgroundColor = "orange";
+                    container.style.backgroundColor = "#1976D2";
                 }
             }
         }
@@ -1270,7 +1270,7 @@ setTimeout(() => {
                 const targetContainerId = `cal_container${selectedFixedChannel}`;
                 const container = document.getElementById(targetContainerId);
                 if (container) {
-                    container.style.backgroundColor = "orange";
+                    container.style.backgroundColor = "#1976D2";
                 }
             }, 1000);
         })
@@ -1836,7 +1836,7 @@ setTimeout(() => {
                             const idx = match[1];
                             const container = document.getElementById(`cal_container${idx}`);
                             if (container) {
-                                container.style.backgroundColor = "orange";
+                                container.style.backgroundColor = "#1976D2";
                             }
                         }
                     }
@@ -1976,7 +1976,7 @@ setTimeout(() => {
                             const targetContainerId = `cal_container${match[1]}`;
                             const container = document.getElementById(targetContainerId);
                             if (container) {
-                                container.style.backgroundColor = "orange";
+                                container.style.backgroundColor = "#1976D2";
                             }
                         }
                     }
@@ -2135,7 +2135,7 @@ setTimeout(() => {
             });
         
             if (container) {
-                container.style.backgroundColor = "orange";
+                container.style.backgroundColor = "#1976D2";
             } else {
                 console.warn(`Container cal_container${index} not found`);
             }
