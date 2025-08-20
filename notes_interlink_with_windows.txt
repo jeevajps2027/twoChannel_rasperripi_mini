@@ -126,3 +126,153 @@ if os.path.exists(client_db_path):
 else:
     print("⚠️ Warning: Z: drive not connected. client_db not available.")
 
+
+
+
+
+
+
+
+
+
+
+windows activate
+1. SQLServerManager16.msc
+        sql server network configuration
+        sql server services-----> running 
+
+2.services.msc
+        sql seerver(MSSQLSERVER)
+        SQL BROWSER these are all must be running
+
+3. windows defender firewall
+        inbound rules -----> new rules -----. port next next 1433as like (tcp udp)
+    
+4.control pannnel----->netwoork and sharing ----> change advance sharinbg setting -----> on file and printer sharing 
+
+
+
+
+
+
+ethernet value:
+
+    sudo ip addr add 192.168.137.220/24 dev eth0
+    sudo ip link set eth0 up
+
+
+odbc free tds
+
+    sudo apt update
+    sudo apt install unixodbc-dev freetds-dev freetds-bin tdsodbc -y
+    pip install django-pyodbc-azure   # or mssql-django (preferred, newer)
+
+
+    for check -----> odbcinst -q -d
+
+Step 2: Configure FreeTDS
+    sudo nano /etc/freetds/freetds.conf
+
+    [SSMS]
+    host = 192.168.137.1   # your Windows IP
+    port = 1433
+    tds version = 7.4
+
+
+Step 3: Add ODBC driver entry
+    sudo nano /etc/odbcinst.ini
+
+    [FreeTDS]
+    Description = FreeTDS unixODBC Driver
+    Driver = /usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
+    Setup  = /usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so
+    UsageCount = 1
+
+    Check path with:
+        ls /usr/lib/arm-linux-gnueabihf/odbc/
+
+
+IF ERROR OCCURE :
+    dpkg -L tdsodbc | grep .so
+
+    You should see something like:
+
+        /usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
+        (or /usr/lib/aarch64-linux-gnu/odbc/libtdsodbc.so if 64-bit OS).
+
+    Update /etc/odbcinst.ini
+
+        sudo nano /etc/odbcinst.ini
+
+        [FreeTDS]
+        Description = FreeTDS ODBC Driver for SQL Server
+        Driver      = /usr/lib/arm-linux-gnueabihf/odbc/libtdsodbc.so
+        Setup       = /usr/lib/arm-linux-gnueabihf/odbc/libtdsS.so
+
+    3. Define DSN in /etc/odbc.ini
+
+        sudo nano /etc/odbc.ini
+
+        ADD
+            [SSMS]
+            Driver   = FreeTDS
+            Server   = 192.168.137.1
+            Port     = 1433
+            TDS_Version = 7.4
+            Database = YourDBName
+
+    4. Test connection
+
+        isql -v SSMS gauge gauge@9999
+
+        +---------------------------------------+
+        | Connected!                            |
+        |                                       |
+        | sql-statement                         |
+        | help [tablename]                      |
+        | quit                                  |
+        +---------------------------------------+
+
+//////////////////////////////////////////////////////
+Fix static IP config
+    sudo nano /etc/dhcpcd.conf
+
+interface eth0
+static ip_address=192.168.8.220/24
+static routers=192.168.8.2
+static domain_name_servers=8.8.8.8 8.8.4.4
+metric 100
+
+interface wlan0
+metric 600
+
+
+    sudo systemctl restart dhcpcd
+///////////////////////////////////////////////////////////////////// this is not work////////////
+
+
+sudo nmcli con mod "eth0-dhcp" ipv4.addresses 192.168.137.220/24
+sudo nmcli con mod "eth0-dhcp" ipv4.gateway 192.168.137.1
+sudo nmcli con mod "eth0-dhcp" ipv4.dns "8.8.8.8 8.8.4.4"
+sudo nmcli con mod "eth0-dhcp" ipv4.method manual
+
+
+
+sudo nmcli con up "eth0-dhcp"
+
+
+ip addr show eth0
+ip route
+
+
+Expected: as like it display
+    inet 192.168.137.220/24 ...
+    default via 192.168.137.1 dev eth0
+
+
+
+
+
+
+    
+

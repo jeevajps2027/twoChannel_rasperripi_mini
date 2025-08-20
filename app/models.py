@@ -47,6 +47,7 @@ class Operator_setting(models.Model):
     operator_no = models.CharField(max_length=10)
     operator_name = models.CharField(max_length=100)
 
+    
 
 class master_data(models.Model):
     a = models.FloatField()
@@ -226,3 +227,5 @@ class InterlinkData(models.Model):
     PartModel = models.CharField(max_length=50)
     CompSrNo = models.CharField(max_length=150)
     CompResultStatus = models.CharField(max_length=50)
+
+    

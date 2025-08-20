@@ -117,7 +117,27 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
         
     },
-    # 'client_db': {  # Your client database CHECKDB becomes secondary
+    # 'mssql': {     # remote SQL Server on Windows
+    #     'ENGINE': 'mssql',
+    #     'NAME': 'demo',
+    #     'USER': 'gauge',
+    #     'PASSWORD': 'gauge@9999',
+    #     'HOST': '192.168.137.1',   # Windows IP on LAN
+    #     'PORT': '1433',
+    #     'OPTIONS': {
+    #         'driver': 'FreeTDS',
+    #         'dsn': 'SSMS',
+    #     },
+    # },
+    
+}
+# 👇 Add this after DATABASES
+# DATABASE_ROUTERS = ['app.db_router.MultiDBRouter']
+
+
+
+
+# 'client_db': {  # Your client database CHECKDB becomes secondary
     #     'ENGINE': 'mssql',
     #     'NAME': 'CHECKDB',
     #     'USER': 'sa',
@@ -129,8 +149,6 @@ DATABASES = {
     #         'extra_params': 'TDS_Version=7.3',
     #     },
     # },
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
